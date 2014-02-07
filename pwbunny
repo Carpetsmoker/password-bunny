@@ -1,0 +1,3 @@
+#!/bin/sh
+me=$(dirname $(realpath $0))
+vim -c "source $me/pwbunny.vim" "$me/passwords.pwbunny"
