@@ -49,7 +49,7 @@ setlocal cryptmethod=blowfish
 setlocal viminfo=
 
 " Make sure we keep the backup & swap file in the same directory, they're
-" encrypted, but we don't want then dangeling around in tmp dirs
+" encrypted, but we don't want them dangeling around in tmp dirs
 setlocal backupdir=.
 setlocal dir=.
 
@@ -156,7 +156,7 @@ endfun
 
 " Copy passwordt with xclip
 fun! PwbunnyCopyPassword()
-	call system("echo " . shellescape(PwbunnyGetPassword()) .  " | xclip")
+	call system("echo -n " . shellescape(PwbunnyGetPassword()) .  " | xclip")
 
 	if s:emptyclipboard > 0
 		let l:i = 0
@@ -197,7 +197,7 @@ fun! PwbunnySort()
 		let l:new += getline(e[1], e[2])
 	endfor
 
-	normal 1G99909D
+	normal 1G99999D
 	call append(".", l:new)
 	normal dd
 	call PwbunnyFold()
