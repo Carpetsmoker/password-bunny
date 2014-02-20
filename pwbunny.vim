@@ -74,7 +74,7 @@ endfun
 
 " Generate a random password
 fun! PwbunnyMakePassword()
-	return system("head -c100 /dev/urandom | strings -n1 | tr -d '[:space:]' | head -c" . s:passwordlength)
+	return system("strings -n1 < /dev/urandom | tr -d '[:space:]' | head -c" . s:passwordlength)
 endfun
 
 
