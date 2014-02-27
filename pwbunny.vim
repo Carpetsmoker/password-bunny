@@ -22,14 +22,14 @@ nnoremap <Leader>s :call PwbunnySort()<CR>
 """ Settings
 """
 
-" Empty the clipboard after this many seconds after calling PwbunnyCopyPassword
-" Set to 0 to disable
+" Empty the clipboard after this many seconds after calling
+" PwbunnyCopyPassword(), set to 0 to disable
 let s:emptyclipboard = 10
 
 " Length of generated passwords
 let s:passwordlength = 15
 
-" Only open fold explicitly (with zo)
+" Only open fold explicitly (with zo or insert commands)
 setlocal foldopen=
 
 " Close folds as soon as we move out of them
@@ -102,6 +102,7 @@ fun! PwbunnyAddEntry()
 	call append("$", l:site)
 	call append("$", l:user)
 	call append("$", l:pass)
+	call append("$", "")
 	if l:first
 		normal dd
 	endif
@@ -154,7 +155,7 @@ fun! PwbunnyGetLine(n)
 endfun
 
 
-" Copy passwordt with xclip
+" Copy password with xclip
 fun! PwbunnyCopyPassword()
 	call system("echo -n " . shellescape(PwbunnyGetPassword()) .  " | xclip")
 
@@ -175,12 +176,16 @@ endfun
 
 " Clear the clipboard
 fun! PwbunnyEmptyClipboard()
-	call system("echo '' | xclip")
+	call system("echo -n '' | xclip")
 endfun
 
 
 " Sort entries
 fun! PwbunnySort()
+	" We need everything to be folded for this to work
+	" TODO: Ideally, this shouldn't really be required
+	call PwbunnyFold()
+
 	let l:names = []
 	for e in PwbunnyGetEntries()
 		call cursor(e[0], 0)
@@ -195,8 +200,14 @@ fun! PwbunnySort()
 	let l:new = []
 	for e in l:names
 		let l:new += getline(e[1], e[2])
+
+		" Add a newline to the last entry, if it isn't there (see Issue #1)
+		if e[2] == line("$") && getline(e[2]) != ""
+			let l:new += ['']
+		endif
 	endfor
 
+	" TODO: This could be better (delete everything)
 	normal 1G99999D
 	call append(".", l:new)
 	normal dd
@@ -205,6 +216,7 @@ endfun
 
 
 " Get list of all entries, as [startline, endline]
+" TODO: This has the side-effect of moving the cursor to line 1
 fun! PwbunnyGetEntries()
 	let l:ret = []
 
