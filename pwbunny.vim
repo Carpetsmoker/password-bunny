@@ -14,7 +14,7 @@
 
 nnoremap <Leader>a :call PwbunnyAddEntry()<CR>
 nnoremap <Leader>c :call PwbunnyCopyPassword()<CR>
-nnoremap <Leader>u :call PwbunnyCopyUser()<CR>
+nnoremap <Leader>u :call PwbunnyCopyUserAndPassword()<CR>
 nnoremap <Leader>p :echo PwbunnyMakePassword()<CR>
 nnoremap <Leader>s :call PwbunnySort()<CR>
 
@@ -158,9 +158,13 @@ endfun
 
 " Copy username with xclip
 "
-fun! PwbunnyCopyUser()
+fun! PwbunnyCopyUserAndPassword()
     call system("echo -n " . shellescape(PwbunnyGetUser()) . " | xclip")
-    echo "Okay"
+    let l:pw = input("Copy password (Esc for no)? ", "yes")
+    if l:pw == "yes"
+        call PwbunnyCopyPassword()
+    endif
+    echo "\nOkay"
 endfun
 
 " Copy password with xclip
