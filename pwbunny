@@ -10,7 +10,7 @@
 
 
 me=$(dirname $(realpath $0))
-file="$me/passwords.pwbunny"
+file=$HOME"/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
 
 
@@ -49,7 +49,7 @@ elif [ $(head -c12 "$file") != "VimCrypt~02!" ]; then
 fi
 
 
-exec vim $args -nc "source $me/pwbunny.vim" "$file"
+exec vim $args -nc "source ~/local/lib/pwbunny/pwbunny.vim" "$file"
 
 
 # The MIT License (MIT)
