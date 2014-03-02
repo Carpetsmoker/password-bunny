@@ -1,0 +1,4 @@
+syntax: glob
+passwords*
+*.pwbunny
+*.bak
