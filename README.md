@@ -19,6 +19,10 @@ timeout can be changed (or disabled) by setting `s:emptyclipboard` in
 `pwbunny.vim`.  
 This feature requires [xclip][xclip].  
 
+- `<Leader>u`  
+Copy the password of the entry under the cursor (which may still be in a closed fold).
+This feature requires [xclip][xclip].  
+
 - `<Leader>C`  
 Empty the clipboard.  
 
