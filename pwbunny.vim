@@ -15,6 +15,7 @@
 nnoremap <Leader>a :call PwbunnyAddEntry()<CR>
 nnoremap <Leader>c :call PwbunnyCopyPassword()<CR>
 nnoremap <Leader>u :call PwbunnyCopyUserAndPassword()<CR>
+nnoremap <Leader>C :call PwbunnyEmptyClipboard()<CR>
 nnoremap <Leader>p :echo PwbunnyMakePassword()<CR>
 nnoremap <Leader>s :call PwbunnySort()<CR>
 
@@ -29,6 +30,27 @@ let s:emptyclipboard = 10
 
 " Length of generated passwords
 let s:passwordlength = 15
+
+" Try and see if we can access the clipboard
+" You could set this manually for a better startup time if you're using a
+" commandline utility
+let s:copymethod = has('clipboard')
+
+if s:copymethod == '0'
+	if system('which xclip  > /dev/null && echo -n 0 || echo -n 1') == '0'
+		let s:copymethod = 'xclip'
+	elseif system('which xcopy  > /dev/null && echo -n 0 || echo -n 1') == '0'
+		let s:copymethod = 'xcopy'
+	elseif system('which xsel  > /dev/null && echo -n 0 || echo -n 1') == '0'
+		let s:copymethod = 'xsel'
+
+		" Newer xsel, which is an `improved' version, but has incompatible
+		" switches..! (why do people do this sort of thing...!?!?)
+		if system('xsel --version > /dev/null && echo -n 0 || echo -n 1') == '0'
+			let s:copymethod = 'xsel-new'
+		endif
+	endif
+endif
 
 " Only open fold explicitly (with zo or insert commands)
 setlocal foldopen=
@@ -134,61 +156,74 @@ endfun
 " Get line number n of an entry
 fun! PwbunnyGetLine(n)
 	let l:folded = foldclosed(".")
-	if search("^$", "Wb") > 0 
+
+	if search("^$", "Wb") == 0
+		normal 1G
+	else
 		normal j
 	endif
-	normal zo
+
+	if l:folded > -1
+		normal zo
+	endif
 
 	let l:i = 1
 	while l:i < a:n
 		normal j
 		let l:i += 1
 	endwhile
-	
+
 	let l:val = getline(".")
 
 	if l:folded > -1
 		normal zc
-	endif	
+	endif
 
 	let l:val = substitute(l:val, "\n$", "", "")
 	return l:val
 endfun
 
 
-" Copy username with xclip
-"
+" Copy username to clipboard
 fun! PwbunnyCopyUserAndPassword()
-    call system("echo -n " . shellescape(PwbunnyGetUser()) . " | xclip")
-    let l:pw = input("Copy password (Esc for no)? ", "yes")
-    if l:pw == "yes"
-        call PwbunnyCopyPassword()
-    endif
-    echo "\nOkay"
+	if !PwbunnyCopyToClipboard(PwbunnyGetUser())
+		return
+	endif
+
+	let l:pw = input("User copied; copy password (Esc or ^C for no)? ", "yes")
+	if l:pw == "yes"
+		call PwbunnyCopyPassword()
+	endif
 endfun
 
-" Copy password with xclip
+
+" Copy password to clipboard
 fun! PwbunnyCopyPassword()
-	call system("echo -n " . shellescape(PwbunnyGetPassword()) .  " | xclip")
+	if !PwbunnyCopyToClipboard(PwbunnyGetPassword())
+		return
+	endif
 
 	if s:emptyclipboard > 0
 		let l:i = 0
 
 		while  l:i < s:emptyclipboard
-			echon "\rClipboard will be emptied in " . (s:emptyclipboard - l:i) . " seconds  "
+			echon "\rPassword copied; clipboard will be emptied in " . (s:emptyclipboard - l:i) . " seconds (^C to cancel)"
 			execute "sleep 1"
 			let l:i += 1
 		endwhile
 
 		call PwbunnyEmptyClipboard()
 	endif
-	echo "Okay"
 endfun
 
 
 " Clear the clipboard
 fun! PwbunnyEmptyClipboard()
-	call system("echo -n '' | xclip")
+	if !PwbunnyCopyToClipboard('')
+		return
+	endif
+	
+	echo "Clipboard cleared"
 endfun
 
 
@@ -250,6 +285,27 @@ fun! PwbunnyGetEntries()
 
 	normal 1G
 	return l:ret
+endfun
+
+
+" Copy str to clipboard
+fun! PwbunnyCopyToClipboard(str)
+	if s:copymethod == '1'
+		let @* = a:str
+	elseif s:copymethod == 'xclip'
+		call system("echo -n " . shellescape(a:str) . " | xclip")
+	elseif s:copymethod == 'xcopy'
+		call system("echo -n " . shellescape(a:str) . " | xcopy")
+	elseif s:copymethod == 'xsel'
+		call system("echo -n " . shellescape(a:str) . " | xsel -c")
+	elseif s:copymethod == 'xsel-new'
+		call system("echo -n " . shellescape(a:str) . " | xsel -i")
+	else
+		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
+		return 0
+	endif
+
+	return 1
 endfun
 
 
