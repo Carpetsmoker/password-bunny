@@ -9,7 +9,7 @@
 #
 
 
-me=$(dirname $(realpath $0))
+me=$(dirname $(readlink -f $0))
 file="$me/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
 
