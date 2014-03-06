@@ -9,7 +9,6 @@
 #
 
 
-me=$(dirname $(realpath $0))
 file=$HOME"/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
 
