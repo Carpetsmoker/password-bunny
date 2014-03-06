@@ -3,7 +3,10 @@ Manage passwords with Vim.
 Use `./pwbunny filename` to start the program.
 
 You will need Vim 7.3 or later. You'll also need [xclip][xclip] if you want to
-copy passwords to your clipboard.
+copy passwords to your clipboard.  
+This program was tested on FreeBSD (9), and Ubuntu 12; it will *probably* also
+work on other POSIX systems (Other Linux systems, OpenBSD, MacOSX, etc.).  
+It will *not* work on Windows.
 
 
 Keybinds
@@ -17,11 +20,11 @@ fold). This is useful if someone may be watching over your shoulder.
 By default, your clipboard will be automatically emptied after 10 seconds, this
 timeout can be changed (or disabled) by setting `s:emptyclipboard` in
 `pwbunny.vim`.  
-This feature requires [xclip][xclip].  
 
 - `<Leader>u`  
-Copy the password of the entry under the cursor (which may still be in a closed fold).
-This feature requires [xclip][xclip].  
+Copy the username of the entry under the cursor (which may still be in a closed
+fold); and after a user confirmation, also copy the password (as with
+`<Leader>c`)  
 
 - `<Leader>C`  
 Empty the clipboard.  
@@ -33,6 +36,17 @@ Generate a random password.
 Sort all entries by title (the 1st line).
 
 By default, Vim maps `<Leader>` to `\`.
+
+
+Clipboard support
+-----------------
+Some functions (`<Leader>c`, `<Leader>C`, and `<Leader>u`) need some way to
+access the clipboard. If Vim has `+clipboard` we'll use that. If it doesn't, we
+try to use one of these commandline utilities:
+
+- [xclip][xclip]
+- [xcopy][xcopy]
+- xsel (the original, no page) or the [newer xsel][xsel]
 
 
 File format
@@ -64,6 +78,7 @@ TODO
   contents; which you can then `save'. We should try and be more user friendly
   than this.
 - Undo after `PwbunnySort()` removes all folds
+- Make `\c` & `\u` work over ssh sessions
 - Prepare for unexpected inquisitions
 
 
@@ -91,17 +106,26 @@ Get password of the entry under the cursor
 Get line number *n* of the entry under the cursor  
 
 - `PwbunnyCopyPassword()`  
-Copy the password of the entry under the cursor (mapped to `<leader>c`)  
+Copy the password of the entry under the cursor (mapped to `<Leader>c`)  
 
-- `PwbunnyGetEntries`  
+- `PwbunnyCopyUserAndPassword()`
+Copy the username of the entry under the cursor, and after a while go ahead and
+copy the password (mapped to `<Leader>u`)  
+
+- `PwbunnyGetEntries()`  
 Get a list of all entries as `[start, end]`  
 
-- `PWbunnySort()`  
+- `PwbunnySort()`  
 Sort *all* entries (mapped to `<Leader>s`)  
 
 - `PwbunnyEmptyClipboard()`  
 Clear the clipboard
 
+- `PwbunnyCopyToClipboard(str)`  
+Copy *str* to the clipboard
+
 
 [blf]: http://en.wikipedia.org/wiki/Blowfish_(cipher)
 [xclip]: http://sourceforge.net/projects/xclip
+[xsel]: http://www.vergenet.net/~conrad/software/xsel/
+[xcopy]: http://www.chiark.greenend.org.uk/~sgtatham/utils/xcopy.html
