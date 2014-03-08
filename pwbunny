@@ -48,8 +48,15 @@ elif [ $(head -c12 "$file") != "VimCrypt~02!" ]; then
 	read x
 fi
 
+while :; do
+	vim $args -nc "source $me/pwbunny.vim" "$file"
 
-exec vim $args -nc "source $me/pwbunny.vim" "$file"
+	[ $? -eq 0 ] && break
+
+	clear
+	echo "That seems to be the wrong password; press enter to try again, or ^C to abort"
+	read x
+done
 
 
 # The MIT License (MIT)
