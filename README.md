@@ -77,9 +77,6 @@ Security
 
 TODO
 ----
-- When you enter a wrong passphrase, Vim will show you the raw (encrypted)
-  contents; which you can then `save'. We should try and be more user friendly
-  than this.
 - Undo after `PwbunnySort()` removes all folds
 - Make `\c` & `\u` work over ssh sessions
 - Prepare for unexpected inquisitions
@@ -126,6 +123,9 @@ Clear the clipboard
 
 - `PwbunnyCopyToClipboard(str)`  
 Copy *str* to the clipboard
+
+- `PwbunnyOpen()`  
+Detect is the correct password was entered
 
 
 [blf]: http://en.wikipedia.org/wiki/Blowfish_(cipher)
