@@ -309,7 +309,23 @@ fun! PwbunnyCopyToClipboard(str)
 endfun
 
 
+" If there are less than 2 + (bytes / 100) newlines, we assume the password
+" is incorrect, and we're displaying a bunch of gibberish. Quit, and try
+" again
+fun! PwbunnyOpen()
+	if line("$") < 2 + (line2byte(line("$")) / 100)
+		" User pressed ^C
+		if strpart(getline("."), 0, 12) == "VimCrypt~02!"
+			quit!
+		else
+			cquit!
+		endif
+	endif
+endfun
+
+
 " Let's go!
+call PwbunnyOpen()
 call PwbunnyFold()
 
 
