@@ -3,8 +3,9 @@ Manage passwords with Vim.
 Use `./pwbunny filename` to start the program.
 
 You will need Vim 7.3 or later.
-This program was tested on FreeBSD 9, and Ubuntu 12; it will *probably* also
-work on other POSIX systems (Other Linux systems, OpenBSD, MacOSX, etc.).  
+This program was tested on FreeBSD, Ubuntu 12.04, and ArchLinux; it will
+*probably* also work on other POSIX systems (Other Linux systems, OpenBSD,
+MacOSX, etc.).  
 It will *not* work on Windows.
 
 
@@ -58,11 +59,12 @@ The file format is extremely simple
 - An entry *must* have at least 3 lines.
 - An entry *must* be followed by 1 or more empty lines; except for the last
   entry, where an empty line is *optional*.
-- The 1st line *must* be the title, which also doubles as the URL.
+- The 1st line *must* be the title, which also doubles as the domain.
 - The 2nd line *must* be the username.
 - The 3rd line *must* be the password.
-- An entry *may* have as many lines as desired. This is useful for storing notes
-  and extra data (eg. SSH fingerprints).
+- An entry *may* have as many lines as desired. This is useful for storing
+  notes, answers to 'security questions' (which should also be random), and
+  other extra data (eg. SSH fingerprints).
 
 
 Security
@@ -78,7 +80,7 @@ Security
 TODO
 ----
 - Undo after `PwbunnySort()` removes all folds
-- Make `\c` & `\u` work over ssh sessions
+- Document how to make `\c` & `\u` work over ssh sessions
 - Prepare for unexpected inquisitions
 
 
