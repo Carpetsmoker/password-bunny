@@ -53,13 +53,19 @@ while :; do
 
 	clear
 	echo "That seems to be the wrong password; press enter to try again, or ^C to abort"
+
+	# Make sure we don't echo anything to the screen, in the case the user
+	# enters the password here (as I did a few times...)
+	# TODO: We really want to solve this better by allowing password input here
+	stty -echo
 	read x
+	stty echo
 done
 
 
 # The MIT License (MIT)
 #
-# Copyright © 2013 Martin Tournoij
+# Copyright © 2014 Martin Tournoij
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to

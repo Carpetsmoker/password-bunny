@@ -33,8 +33,10 @@ let s:passwordlength = 15
 
 " Try and see if we can access the clipboard
 " You could set this manually for a better startup time if you're using a
-" commandline utility
-let s:copymethod = has('clipboard')
+" commandline utility`
+" TODO: Are clipboard *and* xterm_clipboard really required? Figure out the
+" difference...
+let s:copymethod = has('clipboard') && has('xterm_clipboard')
 
 if s:copymethod == '0'
 	if system('which xclip  > /dev/null && echo -n 0 || echo -n 1') == '0'
@@ -205,10 +207,12 @@ fun! PwbunnyCopyPassword()
 
 	if s:emptyclipboard > 0
 		let l:i = 0
+		let l:wait = s:emptyclipboard * 10
 
-		while  l:i < s:emptyclipboard
-			echon "\rPassword copied; clipboard will be emptied in " . (s:emptyclipboard - l:i) . " seconds (^C to cancel)"
-			execute "sleep 1"
+		" If we sleep in steps of 1s, pasting has a delay of 1s
+		while  l:i < l:wait
+			echon "\rPassword copied; clipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel)"
+			execute "sleep 100m"
 			let l:i += 1
 		endwhile
 
@@ -219,7 +223,9 @@ endfun
 
 " Clear the clipboard
 fun! PwbunnyEmptyClipboard()
-	if !PwbunnyCopyToClipboard('')
+	" Using an empty clipboard doesn't seem to work with:
+	" let @* = a:str
+	if !PwbunnyCopyToClipboard(' ')
 		return
 	endif
 	
@@ -309,11 +315,11 @@ fun! PwbunnyCopyToClipboard(str)
 endfun
 
 
-" If there are less than 2 + (bytes / 100) newlines, we assume the password
+" If there are less than 3 + (bytes / 100) newlines, we assume the password
 " is incorrect, and we're displaying a bunch of gibberish. Quit, and try
 " again
 fun! PwbunnyOpen()
-	if line("$") < 2 + (line2byte(line("$")) / 100)
+	if getline(1) != '' && line("$") < 3 + (line2byte(line("$")) / 100)
 		" User pressed ^C
 		if strpart(getline("."), 0, 12) == "VimCrypt~02!"
 			quit!
