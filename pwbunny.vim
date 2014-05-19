@@ -17,6 +17,7 @@ nnoremap <Leader>c :call PwbunnyCopyPassword()<CR>
 nnoremap <Leader>u :call PwbunnyCopyUserAndPassword()<CR>
 nnoremap <Leader>C :call PwbunnyEmptyClipboard()<CR>
 nnoremap <Leader>p :echo PwbunnyMakePassword()<CR>
+nnoremap <Leader>P :put=PwbunnyMakePassword()<CR>
 nnoremap <Leader>s :call PwbunnySort()<CR>
 
 
