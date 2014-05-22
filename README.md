@@ -46,6 +46,9 @@ Empty the clipboard.
 - `<Leader>p`  
 Generate a random password.
 
+- `<Leader>P`  
+Generate a random password & insert it at the cursor position.
+
 - `<Leader>s`  
 Sort all entries by title (the 1st line).
 
