@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# password bunny: Manage passwords with Vim
+#
+# http://code.arp242.net/password-bunny
+#
+# Copyright © 2014 Martin Tournoij <martin@arp242.net>
+# See below for full copyright
+#
+
+
+me=$(dirname $(readlink -f $0))
+file="$me/passwords.pwbunny"
+[ ! -z "$1" ] && file="$1"
+
+
+# New file; adding -x to an already encrypted file will encrypt it twice!
+args=""
+if [ ! -f "$file" ]; then
+	args="-x"
+# cm=zip
+elif [ $(head -c12 "$file") = "VimCrypt~01!" ]; then
+	echo "WARNING"
+	echo "This file either is encrypted using the old ZIP method"
+	echo
+	echo "THIS IS NOT SECURE, AND IS EASILY BROKEN"
+	echo 
+	echo "To properly encrypt this file, use:"
+	echo ":set cryptmethod=blowfish"
+	echo ":w"
+	echo
+	echo "Press enter to continue"
+	read x
+# File doesn't seem to be encrypted
+elif [ $(head -c12 "$file") != "VimCrypt~02!" ]; then
+	echo "WARNING"
+	echo "This file doesn't seem to be encrypted"
+	echo
+	echo "THIS IS NOT SECURE! ANYONE CAN READ YOUR PASSWORDS"
+	echo 
+	echo "To properly encrypt this file, use:"
+	echo ":set cryptmethod=blowfish"
+	echo ":X"
+	echo "[you will be asked for a password]"
+	echo ":w"
+	echo
+	echo "Press enter to continue"
+	read x
+fi
+
+while :; do
+	vim $args -nc "source $me/pwbunny.vim" "$file"
+
+	[ $? -eq 0 ] && break
+
+	clear
+	echo "That seems to be the wrong password; press enter to try again, or ^C to abort"
+
+	# Make sure we don't echo anything to the screen, in the case the user
+	# enters the password here (as I did a few times...)
+	# TODO: We really want to solve this better by allowing password input here
+	stty -echo
+	read x
+	stty echo
+done
+
+
+# The MIT License (MIT)
+#
+# Copyright © 2014 Martin Tournoij
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# The software is provided "as is", without warranty of any kind, express or
+# implied, including but not limited to the warranties of merchantability,
+# fitness for a particular purpose and noninfringement. In no event shall the
+# authors or copyright holders be liable for any claim, damages or other
+# liability, whether in an action of contract, tort or otherwise, arising
+# from, out of or in connection with the software or the use or other dealings
+# in the software.
