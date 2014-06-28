@@ -19,11 +19,11 @@ args=""
 if [ ! -f "$file" ]; then
 	args="-x"
 # cm=zip
-elif [ $(head -c12 "$file") = "VimCrypt~01!" ]; then
+elif [ "$(head -c12 "$file")" = "VimCrypt~01!" ]; then
 	echo "WARNING"
-	echo "This file either is encrypted using the old ZIP method"
+	echo "The file \`$file' either is encrypted using the old ZIP method"
 	echo
-	echo "THIS IS NOT SECURE, AND IS EASILY BROKEN"
+	echo "THIS IS NOT SECURE, AND IS EASILY BROKEN!"
 	echo 
 	echo "To properly encrypt this file, use:"
 	echo ":set cryptmethod=blowfish"
@@ -32,13 +32,13 @@ elif [ $(head -c12 "$file") = "VimCrypt~01!" ]; then
 	echo "Press enter to continue"
 	read x
 # File doesn't seem to be encrypted
-elif [ $(head -c12 "$file") != "VimCrypt~02!" ]; then
+elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 	echo "WARNING"
-	echo "This file doesn't seem to be encrypted"
+	echo "The file \`$file' doesn't seem to be encrypted"
 	echo
-	echo "THIS IS NOT SECURE! ANYONE CAN READ YOUR PASSWORDS"
+	echo "THIS IS NOT SECURE! ANYONE CAN READ YOUR PASSWORDS!"
 	echo 
-	echo "To properly encrypt this file, use:"
+	echo "To properly encrypt this file, use these commands from Vim:"
 	echo ":set cryptmethod=blowfish"
 	echo ":X"
 	echo "[you will be asked for a password]"

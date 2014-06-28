@@ -4,16 +4,15 @@ Use `./pwbunny filename` to start the program.
 
 You will need Vim 7.3 or later.
 This program was tested on FreeBSD, Ubuntu 12.04, and ArchLinux; it will
-*probably* also work on other POSIX systems (Other Linux systems, OpenBSD,
-MacOSX, etc.).  
+*probably* also work on other POSIX systems (OpenBSD, MacOSX, Other Linuxes,
+etc.).  
 It will *not* work on Windows.
 
 
 Clipboard support
 =================
-Some functions (such as `<Leader>c`, `<Leader>C`, and `<Leader>u`) need some way
-to access the clipboard. If Vim has `+clipboard` we'll use that. If it doesn't,
-we try to use one of these commandline utilities:
+Some functions need some way to access the clipboard. If Vim has `+clipboard`
+we'll use that. If it doesn't, we try to use one of these commandline utilities:
 
 - [xclip][xclip]
 - [xcopy][xcopy]
@@ -93,7 +92,7 @@ The file format is extremely simple
 Security
 ========
 - The file is encrypted with [blowfish][blf], which should be secure.
-- Your system's memory will containt the plaintext contents.
+- Your system's memory will contain the plaintext contents.
 - We issue no warnings against unwise passwords (either as master password for
   the file, or passwords for the sites you add). It's *your* responsibility to
   choose good passwords. You *should* use the built-in password generator.
