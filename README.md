@@ -10,10 +10,10 @@ It will *not* work on Windows.
 
 
 Clipboard support
------------------
-Some functions (`<Leader>c`, `<Leader>C`, and `<Leader>u`) need some way to
-access the clipboard. If Vim has `+clipboard` we'll use that. If it doesn't, we
-try to use one of these commandline utilities:
+=================
+Some functions (such as `<Leader>c`, `<Leader>C`, and `<Leader>u`) need some way
+to access the clipboard. If Vim has `+clipboard` we'll use that. If it doesn't,
+we try to use one of these commandline utilities:
 
 - [xclip][xclip]
 - [xcopy][xcopy]
@@ -24,7 +24,7 @@ Clipboard support is *optional*.
 
 
 Keybinds
---------
+========
 - `<Leader>a`  
 Add a new entry, this is the recommended way to add a new entry.
 
@@ -55,8 +55,28 @@ Sort all entries by title (the 1st line).
 By default, Vim maps `<Leader>` to `\`.
 
 
+Settings
+========
+- `s:defaultuser`  
+Default username to use (default: unset)
+
+- `s:site_from_clipboard`  
+Use the clipboard contents as default site; it will try and get the domain part
+from an URL (default: 1)
+
+- `s:emptyclipboard = 10`  
+Empty the clipboard after this many seconds after calling
+PwbunnyCopyPassword(), set to 0 to disable (default: 10)
+
+- `s:passwordlength = 15`  
+Length of generated passwords (default: 15)
+
+- `s:autosort = 1`  
+Sort entries after adding a new one (default: 1)
+
+
 File format
------------
+==========
 The file format is extremely simple
 
 - An entry *must* have at least 3 lines.
@@ -71,7 +91,7 @@ The file format is extremely simple
 
 
 Security
---------
+========
 - The file is encrypted with [blowfish][blf], which should be secure.
 - Your system's memory will containt the plaintext contents.
 - We issue no warnings against unwise passwords (either as master password for
@@ -80,15 +100,31 @@ Security
 - May not be safe against holy hand grenade attacks.
 
 
+ChangeLog
+=========
+
+1.1, to be released
+-------------------
+- Add `<Leader>P` to insert a random password at the cursor position
+- Add option `l:defaultuser` to set a default username
+- Add option `l:site_from_clipboard` use the clipboard contents as default site
+- Add option `l:autosort` to sort automatically sort entries after adding a new one
+
+
+1.0, 20140510
+-------------
+- Initial release
+
+
 TODO
-----
+====
 - Undo after `PwbunnySort()` removes all folds
 - Document how to make `\c` & `\u` work over ssh sessions
 - Prepare for unexpected inquisitions
 
 
 Functions
----------
+=========
 - `PwbunnyFold()`  
 Remove & recreate all folds. This is called on startup
 
@@ -128,6 +164,9 @@ Clear the clipboard
 
 - `PwbunnyCopyToClipboard(str)`  
 Copy *str* to the clipboard
+
+- `PwbunnyGetClipboard()`  
+Get contents of clipboard
 
 - `PwbunnyOpen()`  
 Detect is the correct password was entered

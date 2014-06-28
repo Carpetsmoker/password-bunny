@@ -25,12 +25,21 @@ nnoremap <Leader>s :call PwbunnySort()<CR>
 """ Settings
 """
 
+" Default username to use
+let s:defaultuser = 'martin@arp242.net'
+
+" Use the clipboard contents as default site
+let s:site_from_clipboard = 1
+
 " Empty the clipboard after this many seconds after calling
 " PwbunnyCopyPassword(), set to 0 to disable
 let s:emptyclipboard = 10
 
 " Length of generated passwords
 let s:passwordlength = 15
+
+" Sort entries after adding a new one
+let s:autosort = 1
 
 " Try and see if we can access the clipboard
 " You could set this manually for a better startup time if you're using a
@@ -40,11 +49,11 @@ let s:passwordlength = 15
 let s:copymethod = has('clipboard') && has('xterm_clipboard')
 
 if s:copymethod == '0'
-	if system('which xclip  > /dev/null && echo -n 0 || echo -n 1') == '0'
+	if system('which xclip > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xclip'
-	elseif system('which xcopy  > /dev/null && echo -n 0 || echo -n 1') == '0'
+	elseif system('which xcopy > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xcopy'
-	elseif system('which xsel  > /dev/null && echo -n 0 || echo -n 1') == '0'
+	elseif system('which xsel > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xsel'
 
 		" Newer xsel, which is an `improved' version, but has incompatible
@@ -64,6 +73,12 @@ setlocal foldclose=all
 " Display less info on closed folds
 setlocal foldtext=getline(v:foldstart)
 setlocal fillchars=""
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" You probably don't want to change the settings below this """
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 " Default is zip (insecure!)
 if !has('cryptv')
@@ -100,19 +115,49 @@ endfun
 
 " Generate a random password
 fun! PwbunnyMakePassword()
+	if !exists("s:passwordlength")
+		let s:passwordlength = 15
+	endif
 	return system("strings -n1 < /dev/urandom | tr -d '[:space:]' | head -c" . s:passwordlength)
 endfun
 
 
 " Add a new entry
 fun! PwbunnyAddEntry()
-	let l:site = input("Site: ")
+	if exists("s:site_from_clipboard") && s:site_from_clipboard
+		let l:defaultsite = PwbunnyGetClipboard()
+		" Strip spaces and stuff
+		let l:defaultsite = substitute(l:defaultsite, '\r', '', 'g')
+		let l:defaultsite = substitute(l:defaultsite, '^\s*\|\s*$', '', 'g')
+		let l:defaultsite = strpart(l:defaultsite, 0, 30)
+		let l:defaultsite = substitute(l:defaultsite, '^\s*\|\s*$', '', 'g')
+		
+		" Get just the domain part
+		let l:defaultsite = substitute(l:defaultsite, '^\w*://', '', '')
+		let l:defaultsite = substitute(l:defaultsite, '/.*', '', '')
+
+		let l:site = input("Site (enter for " . l:defaultsite . "): ")
+		if l:site == ""
+			let l:site = l:defaultsite
+		endif
+	else
+		let l:site = input("Site: ")
+	endif
+
 	if l:site == ""
 		echoerr "Site is required"
 		return
 	endif
 
-	let l:user = input("User: ")
+	if exists('s:defaultuser') && s:defaultuser != ""
+		let l:user = input("User (enter for " . s:defaultuser . "): ")
+		if l:user == ""
+			let l:user = s:defaultuser
+		end
+	else
+		let l:user = input("User: ")
+	endif
+
 	let l:pass = input("Password (enter for random): ")
 	if l:pass == ""
 		let l:pass = PwbunnyMakePassword()
@@ -134,6 +179,10 @@ fun! PwbunnyAddEntry()
 	endif
 
 	call PwbunnyFold()
+
+	if exists("s:autosort") && s:autosort
+		call PwbunnySort()
+	endif
 	execute "w"
 endfun
 
@@ -206,12 +255,12 @@ fun! PwbunnyCopyPassword()
 		return
 	endif
 
-	if s:emptyclipboard > 0
+	if exists("s:emptyclipboard") && s:emptyclipboard > 0
 		let l:i = 0
 		let l:wait = s:emptyclipboard * 10
 
 		" If we sleep in steps of 1s, pasting has a delay of 1s
-		while  l:i < l:wait
+		while l:i < l:wait
 			echon "\rPassword copied; clipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel)"
 			execute "sleep 100m"
 			let l:i += 1
@@ -313,6 +362,28 @@ fun! PwbunnyCopyToClipboard(str)
 	endif
 
 	return 1
+endfun
+
+
+" Get clipboard contents
+" TODO: We could also use xprop -root
+fun! PwbunnyGetClipboard()
+	if s:copymethod == '1'
+		let l:contents = @*
+	elseif s:copymethod == 'xclip'
+		let l:contents = call system("xclip -o")
+	elseif s:copymethod == 'xcopy'
+		let l:contents = call system("xcopy -r")
+	elseif s:copymethod == 'xsel'
+		let l:contents = call system("xsel")
+	elseif s:copymethod == 'xsel-new'
+		let l:contents = call system("xsel")
+	else
+		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
+		return -1
+	endif
+	
+	return l:contents
 endfun
 
 
