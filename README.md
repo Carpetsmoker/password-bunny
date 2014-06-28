@@ -1,9 +1,9 @@
 Manage passwords with Vim.
 
-Use `./pwbunny filename` to start the program.
+Use `./pwbunny` to start the program.
 
 You will need Vim 7.3 or later.
-This program was tested on FreeBSD, Ubuntu 12.04, and ArchLinux; it will
+This program was tested on FreeBSD, Ubuntu 12.04, and Arch Linux; it will
 *probably* also work on other POSIX systems (OpenBSD, MacOSX, Other Linuxes,
 etc.).  
 It will *not* work on Windows.
@@ -81,9 +81,9 @@ The file format is extremely simple
 - An entry *must* have at least 3 lines.
 - An entry *must* be followed by 1 or more empty lines; except for the last
   entry, where an empty line is *optional*.
-- The 1st line *must* be the title, which also doubles as the domain.
-- The 2nd line *must* be the username.
-- The 3rd line *must* be the password.
+- The 1st line *must* be the title and *must* be present. THis line also doubles as the domain.
+- The 2nd line *must* be the username, and *may* be blank.
+- The 3rd line *must* be the password, and *may* be blank.
 - An entry *may* have as many lines as desired. This is useful for storing
   notes, answers to 'security questions' (which should also be random), and
   other extra data (eg. SSH fingerprints).
@@ -99,11 +99,11 @@ Security
 - May not be safe against holy hand grenade attacks.
 
 
-ChangeLog
+Changelog
 =========
 
-1.1, to be released
--------------------
+Latest source
+-------------
 - Add `<Leader>P` to insert a random password at the cursor position
 - Add option `l:defaultuser` to set a default username
 - Add option `l:site_from_clipboard` use the clipboard contents as default site
