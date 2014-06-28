@@ -9,8 +9,7 @@
 #
 
 
-me=$(dirname $(readlink -f $0))
-file="$me/passwords.pwbunny"
+file=$HOME"/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
 
 
@@ -49,8 +48,7 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 fi
 
 while :; do
-	vim $args -nc "source $me/pwbunny.vim" "$file"
-
+    vim $args -nc "source ~/local/lib/pwbunny/pwbunny.vim" "$file"
 	[ $? -eq 0 ] && break
 
 	clear
