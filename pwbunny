@@ -8,6 +8,20 @@
 # See below for full copyright
 #
 
+getpw=
+pwname=
+while getopts ":c:" OPTION
+do
+    case $OPTION in
+        c)  getpw=1
+            pwname=$OPTARG
+            ;;
+        ?)  printf "Usage: %s: [-c pwname] [FILE]\n" $(basename $0) >&2
+            exit 2
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
 
 file=$HOME"/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
