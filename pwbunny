@@ -8,6 +8,20 @@
 # See below for full copyright
 #
 
+getpw=""
+pwname=""
+while getopts ":c:" OPTION
+do
+    case $OPTION in
+        c)  getpw=1
+            pwname=$OPTARG
+            ;;
+        ?)  printf "Usage: %s [-c pwname] [FILE]\n" $(basename $0) >&2
+            exit 2
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
 
 file=$HOME"/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
@@ -47,8 +61,14 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 	read x
 fi
 
+getpwarg=""
+if [ ! -z $getpw ]; then
+    getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
+fi
+
 while :; do
-    vim $args -nc "source ~/local/lib/pwbunny/pwbunny.vim" "$file"
+    vim $args -nc "source ~/local/lib/pwbunny/pwbunny.vim $getpwarg" "$file"
+
 	[ $? -eq 0 ] && break
 
 	clear
