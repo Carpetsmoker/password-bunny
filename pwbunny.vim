@@ -103,6 +103,14 @@ setlocal updatecount=200
 """ Functions
 """
 
+fun! PwbunnyFindCopyClose(name)
+    let l:sstr = "/^\\n" . a:name
+    execute l:sstr
+    normal j
+    call PwbunnyCopyPassword()
+    execute ":q"
+endfun
+
 " Make folds
 fun! PwbunnyFold()
 	normal zE
