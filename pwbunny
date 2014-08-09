@@ -8,20 +8,36 @@
 # See below for full copyright
 #
 
+usage="Usage: $(basename "$0") [-c entryname] [FILE]"
+version="1.1, tip"
+
 getpw=""
 pwname=""
-while getopts ":c:" OPTION
-do
-    case $OPTION in
-        c)  getpw=1
-            pwname=$OPTARG
-            ;;
-        ?)  printf "Usage: %s [-c pwname] [FILE]\n" $(basename $0) >&2
-            exit 2
-            ;;
-    esac
+while getopts ":c:hv" option; do
+	case $option in
+		c)
+			getpw=1
+			pwname=$OPTARG
+			;;
+		h)
+			echo "$usage"
+			exit 0
+			;;
+		v)
+			echo "Pwbunny $version"
+			exit 0
+			;;
+		?)
+			echo "$usage" >&2
+			exit 2
+			;;
+	esac
 done
 shift $((OPTIND - 1))
+
+getpwarg=""
+[ ! -z "$getpw" ] && getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
+
 
 me=$(dirname $(readlink -f $0))
 file="$me/passwords.pwbunny"
@@ -60,11 +76,6 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 	echo
 	echo "Press enter to continue"
 	read x
-fi
-
-getpwarg=""
-if [ ! -z $getpw ]; then
-    getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
 fi
 
 while :; do
