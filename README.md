@@ -1,12 +1,15 @@
 Manage passwords with Vim.
 
-Use `./pwbunny` to start the program.
-
 You will need Vim 7.3 or later.
 This program was tested on FreeBSD, Ubuntu 12.04, and Arch Linux; it will
 *probably* also work on other POSIX systems (OpenBSD, MacOSX, Other Linuxes,
 etc.).  
 It will *not* work on Windows.
+
+Use `./pwbunny` to start the program; you can optionally specify a file to open,
+ie: `./pwbunny my-passwords`. The default is `passwords.pwbunny` in the
+directory `pwbunny` was  called from.  
+See `-h` for more commandline options
 
 
 Clipboard support
@@ -20,6 +23,10 @@ we'll use that. If it doesn't, we try to use one of these commandline utilities:
 
 
 Clipboard support is *optional*.
+
+You can also use pwbunny over an ssh session with X forwarding, you do need to
+add `-Y` ie. `ssh -XY $server`
+
 
 
 Keybinds
@@ -104,7 +111,10 @@ Changelog
 
 Latest source
 -------------
-- Add `<Leader>P` to insert a random password at the cursor position
+- Add `-c` commandline option to find an entry, copy it to the clipboard, and
+  exit immediately *(patch by yggdr)*
+- Add `<Leader>P` to insert a random password at the cursor position *(patch by
+  yggdr)*
 - Add option `l:defaultuser` to set a default username
 - Add option `l:site_from_clipboard` use the clipboard contents as default site
 - Add option `l:autosort` to sort automatically sort entries after adding a new one
@@ -118,7 +128,6 @@ Latest source
 TODO
 ====
 - Undo after `PwbunnySort()` removes all folds
-- Document how to make `\c` & `\u` work over ssh sessions
 - Prepare for unexpected inquisitions
 
 
@@ -169,6 +178,9 @@ Get contents of clipboard
 
 - `PwbunnyOpen()`  
 Detect is the correct password was entered
+
+- `PwbunnyFindCopyClose(name)`
+Find an entry by name, copy it to the clipboard, and exit
 
 
 [blf]: http://en.wikipedia.org/wiki/Blowfish_(cipher)
