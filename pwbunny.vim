@@ -104,11 +104,26 @@ setlocal updatecount=200
 """
 
 fun! PwbunnyFindCopyClose(name)
-    let l:sstr = "/^\\n" . a:name
-    execute l:sstr
-    normal j
-    call PwbunnyCopyPassword()
-    execute ":q"
+	let l:sstr = "/^\\n" . a:name
+	try
+		execute l:sstr
+	catch /^Vim\%((\a\+)\)\=:E385/
+		" TODO: ideally, I'd like to exit with status 2, and do this in the
+		" shell script...
+		try
+			echohl ErrorMsg | echo "Entry not found"
+			call input('press enter to exit')
+		finally
+			execute ":q"
+		endtry
+	endtry
+
+	normal j
+	try
+		call PwbunnyCopyPassword()
+	finally
+		execute ":q"
+	endtry
 endfun
 
 " Make folds
@@ -269,8 +284,11 @@ fun! PwbunnyCopyPassword()
 
 		" If we sleep in steps of 1s, pasting has a delay of 1s
 		while l:i < l:wait
-			echon "\rPassword copied; clipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel)"
+			echon "\rPassword copied; clipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel, Enter to empty now)"
 			execute "sleep 100m"
+			if getchar(0) == 10
+				break
+			endif
 			let l:i += 1
 		endwhile
 
