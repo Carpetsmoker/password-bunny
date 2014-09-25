@@ -48,6 +48,7 @@ let s:autosort = 1
 " difference...
 let s:copymethod = has('clipboard') && has('xterm_clipboard')
 
+" TODO: Also test if these tools actually work
 if s:copymethod == '0'
 	if system('which xclip > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xclip'
@@ -90,7 +91,7 @@ setlocal cryptmethod=blowfish
 setlocal viminfo=
 
 " Make sure we keep the backup & swap file in the same directory, they're
-" encrypted, but we don't want them dangeling around in tmp dirs
+" encrypted, but we don't want them dangling around in tmp dirs
 setlocal backupdir=.
 setlocal dir=.
 
@@ -109,7 +110,8 @@ fun! PwbunnyFindCopyClose(name)
 		execute l:sstr
 	catch /^Vim\%((\a\+)\)\=:E385/
 		" TODO: ideally, I'd like to exit with status 2, and do this in the
-		" shell script...
+		" shell script... exiting Vim with an exit status other than 0 or 1
+		" doesn't seem possible, though...
 		try
 			echohl ErrorMsg | echo "Entry not found"
 			call input('press enter to exit')
@@ -141,6 +143,8 @@ fun! PwbunnyMakePassword()
 	if !exists("s:passwordlength")
 		let s:passwordlength = 15
 	endif
+
+	" http://arp242.net/weblog/Generate_passwords_from_the_commandline.html
 	return system("strings -n1 < /dev/urandom | tr -d '[:space:]' | head -c" . s:passwordlength)
 endfun
 
@@ -159,7 +163,11 @@ fun! PwbunnyAddEntry()
 		let l:defaultsite = substitute(l:defaultsite, '^\w*://', '', '')
 		let l:defaultsite = substitute(l:defaultsite, '/.*', '', '')
 
-		let l:site = input("Site (enter for " . l:defaultsite . "): ")
+		if l:defaultsite != ''
+			let l:site = input("Site (enter for " . l:defaultsite . "): ")
+		else
+			let l:site = input("Site: ")
+		end
 		if l:site == ""
 			let l:site = l:defaultsite
 		endif
@@ -284,7 +292,7 @@ fun! PwbunnyCopyPassword()
 
 		" If we sleep in steps of 1s, pasting has a delay of 1s
 		while l:i < l:wait
-			echon "\rPassword copied; clipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel, Enter to empty now)"
+			echon "\rClipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel, Enter to empty now)"
 			execute "sleep 100m"
 			if getchar(0) == 10
 				break
@@ -336,10 +344,12 @@ fun! PwbunnySort()
 		endif
 	endfor
 
-	" TODO: This could be better (delete everything)
-	normal 1G99999D
+	normal 1Gd100%
 	call append(".", l:new)
-	normal dd
+
+	if getline(1) == ''
+		normal 1Gdd
+	endif
 	call PwbunnyFold()
 endfun
 
@@ -397,19 +407,23 @@ fun! PwbunnyGetClipboard()
 	if s:copymethod == '1'
 		let l:contents = @*
 	elseif s:copymethod == 'xclip'
-		let l:contents = call system("xclip -o")
+		let l:contents = system("xclip -o")
 	elseif s:copymethod == 'xcopy'
-		let l:contents = call system("xcopy -r")
+		let l:contents = system("xcopy -r")
 	elseif s:copymethod == 'xsel'
-		let l:contents = call system("xsel")
+		let l:contents = system("xsel")
 	elseif s:copymethod == 'xsel-new'
-		let l:contents = call system("xsel")
+		let l:contents = system("xsel")
 	else
 		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
 		return -1
 	endif
-	
-	return l:contents
+
+	if v:shell_error > 0
+		return ''
+	else
+		return l:contents
+	end
 endfun
 
 
