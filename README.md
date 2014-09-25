@@ -23,14 +23,14 @@ we’ll use that. If it doesn’t, we try to use one of these commandline utilit
 
 Clipboard support is useful but entirely *optional*.
 
-You can also use `pwbunny` over an ssh session with X11 forwarding, please see
-the notes in the ‘Security’ section before enabling this.
+You can also use the clipboard features over an ssh session with X11 forwarding,
+please see the notes in the ‘Security’ section before enabling this.
 
 You also need to enable both `ForwardX11` and `ForwardX11Trusted`; on the
-commandline this can be done with:  
+commandline this can be done with the `-X` and `-Y` flags, i.e.:
 `ssh -XY $server`
 
-Or in your `~/.ssh/config`:
+Or you can set these options for a host in your `~/.ssh/config`:
 
 	Host myhost
 		ForwardX11 yes
