@@ -38,16 +38,19 @@ shift $((OPTIND - 1))
 getpwarg=""
 [ ! -z "$getpw" ] && getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
 
-
-me=$(dirname $(readlink -f $0))
-file="$me/passwords.pwbunny"
+me=$(basename "$0")
+root=$(dirname "$(readlink -f "$me")")
+file="$root/passwords.pwbunny"
 [ ! -z "$1" ] && file="$1"
+
+args=""
+[ "$me" = gpwbunny ] && args=" -g --nofork "
+[ "$me" = epwbunny ] && args=" -y --nofork" # TODO: We need to remap the keys
 
 
 # New file; adding -x to an already encrypted file will encrypt it twice!
-args=""
 if [ ! -f "$file" ]; then
-	args="-x"
+	args=" -x "
 # cm=zip
 elif [ "$(head -c12 "$file")" = "VimCrypt~01!" ]; then
 	echo "WARNING"
@@ -79,7 +82,7 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 fi
 
 while :; do
-    vim $args -nc "source $me/pwbunny.vim $getpwarg" "$file"
+    vim $args -nc "source $root/pwbunny.vim $getpwarg" "$file"
 
 	[ $? -eq 0 ] && break
 

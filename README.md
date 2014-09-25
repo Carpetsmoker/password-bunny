@@ -2,12 +2,12 @@ Manage passwords with Vim.
 
 You will need Vim 7.3 or later.
 This program was tested on FreeBSD & Arch Linux; it will *probably* also work on
-other POSIX systems (OpenBSD, MacOSX, Other Linuxes, etc.).  
-It will *not* work on Windows.
+other POSIX systems (OpenBSD, MacOSX, Other Linuxes, etc.). It will *not* work
+on Windows.
 
-Use `./pwbunny` to start the program; you can optionally specify a file to open,
-i.e.: `./pwbunny my-passwords`. The default is `passwords.pwbunny` in the
-directory `pwbunny` was  called from.  
+Use `./pwbunny` to start the program or use `./gpwbunny` to use gVim. You can
+optionally specify a file to open, i.e.: `./pwbunny my-passwords`. The default
+is `passwords.pwbunny` in the directory `pwbunny` was  called from.  
 See `pwbunny -h` for more commandline options.
 
 
@@ -21,16 +21,20 @@ we’ll use that. If it doesn’t, we try to use one of these commandline utilit
 - xsel (the original, no page) or the [newer xsel][xsel]
 
 
-Clipboard support is *optional*.
+Clipboard support is useful but entirely *optional*.
 
-You can also use `pwbunny` over an ssh session with X11 forwarding, you also
-need to set `ForwardX11Trusted` or `-Y`; ie. `ssh -XY $server`, or in your
-`~/.ssh/config`:
+You can also use `pwbunny` over an ssh session with X11 forwarding, please see
+the notes in the ‘Security’ section before enabling this.
+
+You also need to enable both `ForwardX11` and `ForwardX11Trusted`; on the
+commandline this can be done with:  
+`ssh -XY $server`
+
+Or in your `~/.ssh/config`:
 
 	Host myhost
 		ForwardX11 yes
 		ForwardX11Trusted yes
-
 
 Security
 ========
@@ -44,7 +48,8 @@ Security
 
 - Using `ForwardX11Trusted` effectively gives the server complete control over
   the machine you’re connecting with, which may be a **serious** security
-  problem. **Only** use this if you fully trust the server.
+  problem. **Only** use this if you fully trust the server, and **do not** set
+  these options globally!
 
 - May not be safe against holy hand grenade attacks.
 
@@ -139,6 +144,8 @@ Latest source
 - Add option `l:autosort` to sort automatically sort entries after adding a new
   one.
 
+- Add `gpwbunny` to use gVim.
+
 - Fix a few minor bugs.
 
 
@@ -159,6 +166,9 @@ TODO
 - A tool to regenerate passwords, and/or store when they were last changed,
   perhaps also integrate https://datalossdb.org and/or
   http://thepasswordproject.com/leaked_password_lists_and_dictionaries
+
+- `gpwbunny` is not perfect, since it also relies on input from the terminal if
+  the user enters a wrong password.
 
 - Prepare for unexpected inquisitions.
 
