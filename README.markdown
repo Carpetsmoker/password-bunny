@@ -38,9 +38,12 @@ Or you can set these options for a host in your `~/.ssh/config`:
 
 Security
 ========
-- The file is encrypted with [blowfish][blf], which should be secure.
+- The file is encrypted with [blowfish][blf], which should be secure, although
+  it is possible that the Vim implementation may be incorrect (a serious
+  [vulnerability][vuln] was discovered, and fixed, in August 2014).
 
-- Your system’s memory will contain the plaintext contents.
+- Your system’s memory will contain the plaintext contents. You should only run
+  this program on trusted machines (ie. not a shared host or the like).
 
 - We issue no warnings against unwise passwords (either as master password for
   the file, or passwords for the sites you add). It’s *your* responsibility to
@@ -58,6 +61,9 @@ Keybinds
 ========
 - `<Leader>a`  
 Add a new entry. This is the recommended way to add a new entry.
+
+- `<Leader>g`
+Go to an entry; try to open it in a browser.  
 
 - `<Leader>c`  
 Copy the password of the entry under the cursor (which may still be in a closed
@@ -82,6 +88,7 @@ Generate a random password & insert it at the cursor position.
 
 - `<Leader>s`  
 Sort all entries by title (the first line).
+
 
 By default, Vim maps `<Leader>` to `\`.
 
@@ -108,7 +115,7 @@ Sort entries after adding a new one (default: 1).
 
 File format
 ==========
-The file format is extremely simple
+The file format is simple:
 
 - An entry *must* have at least 3 lines.
 
@@ -125,12 +132,18 @@ The file format is extremely simple
   notes, answers to ‘security questions’ (which should also be random), and
   other extra data (e.g. SSH fingerprints).
 
+- Any line starting with `~!!~` is considered to be metadata; this line is
+  *optional*, and *may* occur anywhere after the 3rd line. An entry *cannnot*
+  have more than 1 such line.
+
 
 Changelog
 =========
 
 Latest source
 -------------
+- [`cm=blowfish` has been discovered to be insecure][vuln]
+
 - Add `-c` commandline option to find an entry, copy it to the clipboard, and
   exit immediately *(patch by yggdr)*.
 
@@ -145,6 +158,12 @@ Latest source
   one.
 
 - Add `gpwbunny` to use gVim.
+
+- Use `~/.pwbunny/passwords.pwbunny` as the default file; `./passwords.pwbunny`
+  is used if it exists.
+
+- `pwbunny.vim` is now used from `/usr/share/pwbunny/pwbunny.vim` if
+  `./pwbunny.vim` doesn't exist.
 
 - Fix a few minor bugs.
 
@@ -167,8 +186,14 @@ TODO
   perhaps also integrate https://datalossdb.org and/or
   http://thepasswordproject.com/leaked_password_lists_and_dictionaries
 
-- `gpwbunny` is not perfect, since it also relies on input from the terminal if
-  the user enters a wrong password.
+- `gpwbunny` is not perfect, since it relies on input from the terminal if the
+  user enters a wrong password (you can't use it from a shortcut).
+
+- Include a function to measure password strength
+
+- Some way to go to an URL/address, immediately copy user/password as well?
+
+- Add `.desktop` file.
 
 - Prepare for unexpected inquisitions.
 
@@ -225,7 +250,14 @@ Detect is the correct password was entered.
 Find an entry by name, copy it to the clipboard, and exit.
 
 
+Alternatives
+------------
+- [vim-safe](https://github.com/antenore/vim-safe); seems less mature, but has a
+  different approach on some things; may be of interest.
+
+
 [blf]: http://en.wikipedia.org/wiki/Blowfish_(cipher)
 [xclip]: http://sourceforge.net/projects/xclip
 [xsel]: http://www.vergenet.net/~conrad/software/xsel/
 [xcopy]: http://www.chiark.greenend.org.uk/~sgtatham/utils/xcopy.html
+[vuln]: https://groups.google.com/d/msg/vim_dev/D8FyRd0EwlE/bkBOo-hzTzoJ
