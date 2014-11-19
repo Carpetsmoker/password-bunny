@@ -85,7 +85,7 @@ setlocal fillchars=""
 if !has('cryptv')
 	echoerr "Your Vim doesn't support encrypting files -- DO NOT USE THIS PROGRAM BEFORE FIXING THIS!"
 endif
-setlocal cryptmethod=blowfish
+setlocal cryptmethod=blowfish2
 
 " VimInfo file isn't encrypted, and may possible leak data
 setlocal viminfo=
