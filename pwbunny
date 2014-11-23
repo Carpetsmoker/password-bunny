@@ -8,8 +8,18 @@
 # See below for full copyright
 #
 
-usage="Usage: $(basename "$0") [-c entryname] [FILE]"
-version="1.1, tip"
+version="1.1"
+
+usage() {
+	echo "Usage: $(basename "$0") [-v] [-s file] [-c entryname] [file]"
+	echo
+	echo "  -h     Show this help"
+	echo "  -v     Show version and exit"
+	echo "  -c     TODO"
+	echo "  -s     Specify location of pwbunny.vim; defaults to TODO"
+	echo "  file   File to open, defaults to TODO"
+	echo
+}
 
 getpw=""
 pwname=""
@@ -18,10 +28,13 @@ while getopts ":c:hv" option; do
 	case $option in
 		c)
 			getpw=1
-			pwname=$OPTARG
+			pwname="$OPTARG"
+			;;
+		s)
+			vimfile="$OPTARG"
 			;;
 		h)
-			echo "$usage"
+			usage
 			exit 0
 			;;
 		v)
@@ -29,21 +42,38 @@ while getopts ":c:hv" option; do
 			exit 0
 			;;
 		?)
-			echo "$usage" >&2
+			usage
 			exit 2
 			;;
 	esac
 done
 shift $((OPTIND - 1))
 
-file=$HOME"/passwords.pwbunny"
-[ ! -z "$1" ] && file="$1"
+getpwarg=""
+[ ! -z "$getpw" ] && getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
+
+me=$(basename "$0")
+root=$(dirname "$(readlink -f "$0")")
+if [ ! -z "$1" ]; then
+	file="$1"
+elif [ -f "$HOME/.pwbunny/passwords.pwbunny" ]; then
+	file="$HOME/.pwbunny/passwords.pwbunny"
+elif [ -f "$root/passwords.pwbunny" ]; then
+	file="$root/passwords.pwbunny"
+else
+	file="$HOME/.pwbunny/passwords.pwbunny"
+fi
+
+mkdir -p "$(dirname "$file")"
+
+args=""
+[ "$me" = gpwbunny ] && args=" -g --nofork "
+[ "$me" = epwbunny ] && args=" -y --nofork" # TODO: We need to remap the keys
 
 
 # New file; adding -x to an already encrypted file will encrypt it twice!
-args=""
 if [ ! -f "$file" ]; then
-	args="-x"
+	args=" -x "
 # cm=zip
 elif [ "$(head -c12 "$file")" = "VimCrypt~01!" ]; then
 	echo "WARNING"
@@ -57,8 +87,24 @@ elif [ "$(head -c12 "$file")" = "VimCrypt~01!" ]; then
 	echo
 	echo "Press enter to continue"
 	read x
+# cm=blowfish
+elif [ "$(head -c12 "$file")" == "VimCrypt~02!" ]; then
+	echo "WARNING"
+	echo "The file \`$file' uses cryptmethod=blowfish"
+	echo
+	echo "THIS IS NO LONGER SECURE!"
+	echo
+	echo "For details, see:"
+	echo "https://groups.google.com/d/msg/vim_dev/D8FyRd0EwlE/bkBOo-hzTzoJ"
+	echo 
+	echo "To properly encrypt this file, use:"
+	echo ":set cryptmethod=blowfish2"
+	echo ":w"
+	echo
+	echo "Press enter to continue"
+	read x
 # File doesn't seem to be encrypted
-elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
+elif [ "$(head -c12 "$file")" != "VimCrypt~03!" ]; then
 	echo "WARNING"
 	echo "The file \`$file' doesn't seem to be encrypted"
 	echo
@@ -74,13 +120,29 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~02!" ]; then
 	read x
 fi
 
-getpwarg=""
-if [ ! -z $getpw ]; then
-    getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
+vimfiles="/usr/share/pwbunny/pwbunny.vim \
+	/usr/local/share/pwbunny/pwbunny.vim \
+	/usr/pkg/share/pwbunny/pwbunny.vim \
+	$root/pwbunny.vim"
+
+if [ -z "$vimfile" ]; then
+	for f in $vimfiles; do
+		if [ -f "$f" ]; then
+			vimfile="$f"
+			break
+		fi
+	done
+fi
+
+if [ -z "$vimfile" ]; then
+	echo "Unable to find pwbunny.vim" >&2
+	exit 3
 fi
 
 while :; do
-    vim $args -nc "source ~/local/lib/pwbunny/pwbunny.vim $getpwarg" "$file"
+    vim $args -n \
+		-c "source $root/parsejson.vim | source $vimfile $getpwarg"  \
+		"$file"
 
 	[ $? -eq 0 ] && break
 
