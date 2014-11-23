@@ -120,9 +120,25 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~03!" ]; then
 	read x
 fi
 
+jsonfiles="/usr/share/pwbunny/parsejson.vim \
+	/usr/local/share/pwbunny/parsejson.vim \
+	/usr/pkg/share/pwbunny/parsejson.vim \
+    $root/../lib/pwbunny/parsejson.vim \
+	$root/parsejson.vim"
+
+if [ -z "$jsonfile" ]; then
+	for j in $jsonfiles; do
+		if [ -f "$j" ]; then
+			jsonfile="$j"
+			break
+		fi
+	done
+fi
+
 vimfiles="/usr/share/pwbunny/pwbunny.vim \
 	/usr/local/share/pwbunny/pwbunny.vim \
 	/usr/pkg/share/pwbunny/pwbunny.vim \
+    $root/../lib/pwbunny/pwbunny.vim \
 	$root/pwbunny.vim"
 
 if [ -z "$vimfile" ]; then
@@ -141,7 +157,7 @@ fi
 
 while :; do
     vim $args -n \
-		-c "source $root/parsejson.vim | source $vimfile $getpwarg"  \
+		-c "source $jsonfile | source $vimfile $getpwarg"  \
 		"$file"
 
 	[ $? -eq 0 ] && break
