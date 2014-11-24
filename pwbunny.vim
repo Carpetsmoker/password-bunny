@@ -26,7 +26,7 @@ nnoremap <Leader>s :call PwbunnySort()<CR>
 """
 
 " Default username to use
-let s:defaultuser = 'yggdrasil'
+let s:defaultuser = 'martin@arp242.net'
 
 " Use the clipboard contents as default site
 let s:site_from_clipboard = 1
@@ -39,7 +39,7 @@ let s:emptyclipboard = 10
 let s:passwordlength = 15
 
 " Sort entries after adding a new one
-let s:autosort = 0
+let s:autosort = 1
 
 " Try and see if we can access the clipboard
 " You could set this manually for a better startup time if you're using a
