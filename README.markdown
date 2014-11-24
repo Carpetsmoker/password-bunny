@@ -45,6 +45,12 @@ Security
 - Your system’s memory will contain the plaintext contents. You should only run
   this program on trusted machines (ie. not a shared host or the like).
 
+- PwBunny uses the system’s clipboard extensively to get the passwords to your
+  applications (eg. browser); you should be aware that *any* program can read
+  the clipboard, including malicious clipboard snoopers (as well as
+  non-malicious snoopers, which may store their clipboard history database as
+  world-readable in plain text).
+
 - We issue no warnings against unwise passwords (either as master password for
   the file, or passwords for the sites you add). It’s *your* responsibility to
   choose good passwords. You *should* use the built-in password generator.
