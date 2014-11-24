@@ -21,14 +21,10 @@ usage() {
 	echo
 }
 
-getpw=""
-pwname=""
-
 while getopts ":c:hv" option; do
 	case $option in
 		c)
-			getpw=1
-			pwname="$OPTARG"
+			getpwarg="| call PwbunnyFindCopyClose('"$OPTARG"')"
 			;;
 		s)
 			vimfile="$OPTARG"
@@ -48,9 +44,6 @@ while getopts ":c:hv" option; do
 	esac
 done
 shift $((OPTIND - 1))
-
-getpwarg=""
-[ ! -z "$getpw" ] && getpwarg="| call PwbunnyFindCopyClose('"$pwname"')"
 
 me=$(basename "$0")
 root=$(dirname "$(readlink -f "$0")")
@@ -111,7 +104,7 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~03!" ]; then
 	echo "THIS IS NOT SECURE! ANYONE CAN READ YOUR PASSWORDS!"
 	echo 
 	echo "To properly encrypt this file, use these commands from Vim:"
-	echo ":set cryptmethod=blowfish"
+	echo ":set cryptmethod=blowfish2"
 	echo ":X"
 	echo "[you will be asked for a password]"
 	echo ":w"
@@ -123,7 +116,7 @@ fi
 jsonfiles="/usr/share/pwbunny/parsejson.vim \
 	/usr/local/share/pwbunny/parsejson.vim \
 	/usr/pkg/share/pwbunny/parsejson.vim \
-    $root/../lib/pwbunny/parsejson.vim \
+    $root/../share/pwbunny/parsejson.vim \
 	$root/parsejson.vim"
 
 if [ -z "$jsonfile" ]; then
@@ -135,10 +128,15 @@ if [ -z "$jsonfile" ]; then
 	done
 fi
 
+if [ -z "$jsonfile" ]; then
+	echo "Unable to find parsejson.vim" >&2
+	exit 3
+fi
+
 vimfiles="/usr/share/pwbunny/pwbunny.vim \
 	/usr/local/share/pwbunny/pwbunny.vim \
 	/usr/pkg/share/pwbunny/pwbunny.vim \
-    $root/../lib/pwbunny/pwbunny.vim \
+    $root/../share/pwbunny/pwbunny.vim \
 	$root/pwbunny.vim"
 
 if [ -z "$vimfile" ]; then
