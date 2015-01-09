@@ -3,7 +3,7 @@
 "
 " http://code.arp242.net/password-bunny
 "
-" Copyright © 2014 Martin Tournoij <martin@arp242.net>
+" Copyright © 2014-2015 Martin Tournoij <martin@arp242.net>
 " See below for full copyright
 "
 
@@ -546,54 +546,6 @@ fun! PwbunnyGetClipboard()
 endfun
 
 
-" This is an experiment.
-let s:check_leaked = "http://pwleaks.arp242.net"
-fun! PwbunnyLeaked()
-	if s:check_leaked == ''
-		return
-	endif
-
-	let l:body = system("curl -s " . s:check_leaked . "/list.json")
-	try
-		let l:list = ParseJSON(l:body)
-	catch /Parse/
-		echohl ErrorMsg
-		echo "Unable to parse JSON from s:check_leaked (`" . s:check_leaked . "'); body:"
-		echo l:body
-		echoerr "Unable to check for leaked passwords"
-	endtry
-
-	let l:entries = []
-	for e in PwbunnyGetEntries()
-		call cursor(e[0], 0)
-		"call add(l:entries, [PwbunnyGetSite(), e[0], e[1]])
-		for l in l:list
-			for d in l.domains_regexp
-				let l:site = PwbunnyExtractDomain(PwbunnyGetSite(), 0)
-				if match(l:site, d) >= 0
-					call add(l:entries, [l:site, l])
-				endif
-			endfor
-		endfor
-	endfor
-
-	fun! s:sort(i1, i2)
-		return a:i1 == a:i2 ? 0 : a:i1 > a:i2 ? 1 : -1
-	endfun
-
-	let l:idlist = map(copy(l:entries), "v:val[1]['id']")
-	let l:idlist = uniq(sort(l:idlist, "s:sort"))
-
-	"strftime("%Y-%m-%d")
-
-	echohl WarningMsg
-	echo "You have " . len(l:entries) . " (potentially) vulnerable entries in your password file"
-	echo "It is recommended you change them now!"
-	echo "More information: " . s:check_leaked . "/" . join(l:idlist, ",")
-	echohl None
-endfun
-
-
 " If there are less than 3 + (bytes / 100) newlines, we assume the password
 " is incorrect, and we're displaying a bunch of gibberish. Quit, and try
 " again
@@ -611,14 +563,12 @@ endfun
 
 " Let's go!
 call PwbunnyOpen()
-" TODO: Do this async on start, or something...
-"call PwbunnyLeaked()
 call PwbunnyFold()
 
 
 " The MIT License (MIT)
 "
-" Copyright © 2014 Martin Tournoij
+" Copyright © 2014-2015 Martin Tournoij
 "
 " Permission is hereby granted, free of charge, to any person obtaining a copy
 " of this software and associated documentation files (the "Software"), to

@@ -4,7 +4,7 @@
 #
 # http://code.arp242.net/password-bunny
 #
-# Copyright © 2014 Martin Tournoij <martin@arp242.net>
+# Copyright © 2014-2015 Martin Tournoij <martin@arp242.net>
 # See below for full copyright
 #
 
@@ -113,30 +113,10 @@ elif [ "$(head -c12 "$file")" != "VimCrypt~03!" ]; then
 	read x
 fi
 
-jsonfiles="/usr/share/pwbunny/parsejson.vim \
-	/usr/local/share/pwbunny/parsejson.vim \
-	/usr/pkg/share/pwbunny/parsejson.vim \
-    $root/../share/pwbunny/parsejson.vim \
-	$root/parsejson.vim"
-
-if [ -z "$jsonfile" ]; then
-	for j in $jsonfiles; do
-		if [ -f "$j" ]; then
-			jsonfile="$j"
-			break
-		fi
-	done
-fi
-
-if [ -z "$jsonfile" ]; then
-	echo "Unable to find parsejson.vim" >&2
-	exit 3
-fi
-
 vimfiles="/usr/share/pwbunny/pwbunny.vim \
 	/usr/local/share/pwbunny/pwbunny.vim \
 	/usr/pkg/share/pwbunny/pwbunny.vim \
-    $root/../share/pwbunny/pwbunny.vim \
+	$root/../share/pwbunny/pwbunny.vim \
 	$root/pwbunny.vim"
 
 if [ -z "$vimfile" ]; then
@@ -154,8 +134,8 @@ if [ -z "$vimfile" ]; then
 fi
 
 while :; do
-    vim $args -n \
-		-c "source $jsonfile | source $vimfile $getpwarg"  \
+	vim $args -n \
+		-c "source $vimfile $getpwarg"  \
 		"$file"
 
 	[ $? -eq 0 ] && break
@@ -174,7 +154,7 @@ done
 
 # The MIT License (MIT)
 #
-# Copyright © 2014 Martin Tournoij
+# Copyright © 2014-2015 Martin Tournoij
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
