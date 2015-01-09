@@ -54,6 +54,8 @@ if s:copymethod == '0'
 		let s:copymethod = 'xclip'
 	elseif system('which xcopy > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xcopy'
+	elseif system('which pbcopy > /dev/null && echo -n 0 || echo -n 1') == '0'
+		let s:copymethod = 'pbcopy'
 	elseif system('which xsel > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xsel'
 
@@ -493,6 +495,7 @@ endfun
 
 
 " Copy str to clipboard
+" TODO: Backslash fails!
 fun! PwbunnyCopyToClipboard(str)
 	if s:copymethod == '1'
 		let @* = a:str
@@ -500,6 +503,8 @@ fun! PwbunnyCopyToClipboard(str)
 		call system("echo -n " . shellescape(a:str) . " | xclip")
 	elseif s:copymethod == 'xcopy'
 		call system("echo -n " . shellescape(a:str) . " | xcopy")
+	elseif s:copymethod == 'pbcopy'
+		call system("echo -n " . shellescape(a:str) . " | pbcopy")
 	elseif s:copymethod == 'xsel'
 		call system("echo -n " . shellescape(a:str) . " | xsel -c")
 	elseif s:copymethod == 'xsel-new'
@@ -522,6 +527,8 @@ fun! PwbunnyGetClipboard()
 		let l:contents = system("xclip -o")
 	elseif s:copymethod == 'xcopy'
 		let l:contents = system("xcopy -r")
+	elseif s:copymethid == 'pbcopy'
+		let l:contents = system("pbpaste -Prefer txt")
 	elseif s:copymethod == 'xsel'
 		let l:contents = system("xsel")
 	elseif s:copymethod == 'xsel-new'
