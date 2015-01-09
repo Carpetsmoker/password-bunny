@@ -148,6 +148,8 @@ Changelog
 
 Latest source
 -------------
+- Add `Makefile` *(patch by yggdr)*.
+
 - [`cm=blowfish` has been discovered to be insecure][vuln]
 
 - Add `-c` commandline option to find an entry, copy it to the clipboard, and
@@ -195,9 +197,11 @@ TODO
 - `gpwbunny` is not perfect, since it relies on input from the terminal if the
   user enters a wrong password (you can't use it from a shortcut).
 
-- Include a function to measure password strength
+- Include a function to measure password strength (zxcvb?)
 
 - Some way to go to an URL/address, immediately copy user/password as well?
+
+- Allow settings in ~/
 
 - Add `.desktop` file.
 
