@@ -19,6 +19,7 @@ we’ll use that. If it doesn’t, we try to use one of these commandline utilit
 - [xclip][xclip]
 - [xcopy][xcopy]
 - xsel (the original, no page) or the [newer xsel][xsel]
+- `pbcopy`/`pbpaste` (for OSX)
 
 
 Clipboard support is useful but entirely *optional*.
@@ -149,6 +150,8 @@ Changelog
 Latest source
 -------------
 - Add `Makefile` *(patch by yggdr)*.
+
+- Try to use `pbcopy`/`pbpaste` (for OSX)
 
 - [`cm=blowfish` has been discovered to be insecure][vuln]
 
