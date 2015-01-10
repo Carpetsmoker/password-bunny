@@ -149,7 +149,7 @@ fun! PwbunnyMakePassword()
 	endif
 
 	" http://arp242.net/weblog/Generate_passwords_from_the_commandline.html
-	return system("strings -n1 < /dev/urandom | tr -d '[:space:]' | head -c" . s:passwordlength)
+	return system("strings -n 1 < /dev/urandom | tr -d '[:space:]' | head -c " . s:passwordlength)
 endfun
 
 
@@ -527,7 +527,7 @@ fun! PwbunnyGetClipboard()
 		let l:contents = system("xclip -o")
 	elseif s:copymethod == 'xcopy'
 		let l:contents = system("xcopy -r")
-	elseif s:copymethid == 'pbcopy'
+	elseif s:copymethod == 'pbcopy'
 		let l:contents = system("pbpaste -Prefer txt")
 	elseif s:copymethod == 'xsel'
 		let l:contents = system("xsel")
