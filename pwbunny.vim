@@ -497,18 +497,22 @@ endfun
 " Copy str to clipboard
 " TODO: Backslash fails!
 fun! PwbunnyCopyToClipboard(str)
+	fun! s:esc(s)
+		return shellescape(escape(a:s, '\'))
+	endfun
+
 	if s:copymethod == '1'
 		let @* = a:str
 	elseif s:copymethod == 'xclip'
-		call system("echo -n " . shellescape(a:str) . " | xclip")
+		call system("echo -n " . s:esc(a:str) . " | xclip")
 	elseif s:copymethod == 'xcopy'
-		call system("echo -n " . shellescape(a:str) . " | xcopy")
+		call system("echo -n " . s:esc(a:str) . " | xcopy")
 	elseif s:copymethod == 'pbcopy'
-		call system("echo -n " . shellescape(a:str) . " | pbcopy")
+		call system("echo -n " . s:esc(a:str) . " | pbcopy")
 	elseif s:copymethod == 'xsel'
-		call system("echo -n " . shellescape(a:str) . " | xsel -c")
+		call system("echo -n " . s:esc(a:str) . " | xsel -c")
 	elseif s:copymethod == 'xsel-new'
-		call system("echo -n " . shellescape(a:str) . " | xsel -i")
+		call system("echo -n " . s:esc(a:str) . " | xsel -i")
 	else
 		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
 		return 0
