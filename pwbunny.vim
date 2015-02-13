@@ -571,8 +571,7 @@ fun! PwbunnyGoto(site)
 		let l:site = 'https://' . l:site
 	endif
 
-	" TODO: How to pass l:site...?
-	exe 'normal gx'
+	call netrw#BrowseX(l:site, netrw#CheckIfRemote())
 endfun
 
 
