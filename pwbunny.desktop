@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Password bunny
+GenericName=Password manager
+Comment=Password bunny manages your passwords with Vim
+Exec=pwbunny
+Icon=pwbunny
+Terminal=true
+Categories=Utility;
