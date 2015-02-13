@@ -61,7 +61,6 @@ mkdir -p "$(dirname "$file")"
 
 args=""
 [ "$me" = gpwbunny ] && args=" -g --nofork "
-[ "$me" = epwbunny ] && args=" -y --nofork" # TODO: We need to remap the keys
 
 
 # New file; adding -x to an already encrypted file will encrypt it twice!

@@ -8,13 +8,13 @@ on Windows.
 Use `./pwbunny` to start the program or use `./gpwbunny` to use gVim. You can
 optionally specify a file to open, i.e.: `./pwbunny my-passwords`. The default
 is `passwords.pwbunny` in the directory `pwbunny` was  called from.  
-See `pwbunny -h` for more commandline options.
+See `pwbunny -h` for more command-line options.
 
 
 Clipboard support
 =================
 Some functions need some way to access the clipboard. If Vim has `+clipboard`
-we’ll use that. If it doesn’t, we try to use one of these commandline utilities:
+we’ll use that. If it doesn’t, we try to use one of these command-line utilities:
 
 - [xclip][xclip]
 - [xcopy][xcopy]
@@ -28,7 +28,7 @@ You can also use the clipboard features over an ssh session with X11 forwarding,
 please see the notes in the ‘Security’ section before enabling this.
 
 You also need to enable both `ForwardX11` and `ForwardX11Trusted`; on the
-commandline this can be done with the `-X` and `-Y` flags, i.e.:
+command-line this can be done with the `-X` and `-Y` flags, i.e.:
 `ssh -XY $server`
 
 Or you can set these options for a host in your `~/.ssh/config`:
@@ -69,8 +69,8 @@ Keybinds
 - `<Leader>a`  
 Add a new entry. This is the recommended way to add a new entry.
 
-- `<Leader>g`
-Go to an entry; try to open it in a browser.  
+- `<Leader>g`  
+Go to an entry; try to open it in a browser (this uses `gx`).
 
 - `<Leader>c`  
 Copy the password of the entry under the cursor (which may still be in a closed
@@ -96,6 +96,14 @@ Generate a random password & insert it at the cursor position.
 - `<Leader>s`  
 Sort all entries by title (the first line).
 
+- `<Leader>e`  
+Show an estimation of the password strength at the cursor position, where 0=
+horrible and 4=superb.
+
+- `<Leader>E`  
+Show an estimation of all the password strengths that are lower than
+`s:min_password_strength`.
+
 
 By default, Vim maps `<Leader>` to `\`.
 
@@ -119,6 +127,18 @@ Length of generated passwords (default: 15).
 - `s:autosort = 1`  
 Sort entries after adding a new one (default: 1).
 
+- `s:min_password_strength = 4`  
+	Minimal passwords strength, score of 0 to 4 based on a estimation of the actual
+	crack time in:
+	- 0. 100 seconds (very bad)
+	- 1. 2.5 hours (bit better, but still bad)
+	- 2. 11 days (okay-ish)
+	- 3. 3 years (good)
+	- 4. Infinity (Very good)
+
+A score of 4 is recommended (this is the default), 3 is acceptable, 2 or lower
+is strongly discouraged
+
 
 File format
 ==========
@@ -129,7 +149,7 @@ The file format is simple:
 - An entry *must* be followed by 1 or more empty lines; except for the last
   entry, where an empty line is *optional*.
 
-- The 1st line *must* be the title and *must* be present. THis line also doubles as the domain.
+- The 1st line *must* be the title and *must* be present. This line also doubles as the domain.
 
 - The 2nd line *must* be the username, and *may* be blank.
 
@@ -155,7 +175,7 @@ Latest source
 
 - [`cm=blowfish` has been discovered to be insecure][vuln]
 
-- Add `-c` commandline option to find an entry, copy it to the clipboard, and
+- Add `-c` command-line option to find an entry, copy it to the clipboard, and
   exit immediately *(patch by yggdr)*.
 
 - Add `<Leader>P` to insert a random password at the cursor position *(patch by
@@ -186,10 +206,8 @@ Latest source
 
 TODO
 ====
-- Undo after `PwbunnySort()` removes all folds.
-
-- The automatic password clearing doesn’t work properly if your terminal window
-  is smaller that the timeout counter text displayed (74 characters).
+- Undo after `PwbunnySort()` removes all folds... Not sure how we can fix
+  this...
 
 - Write some tests (http://usevim.com/2012/10/17/vim-unit-tests/).
 
@@ -197,16 +215,7 @@ TODO
   perhaps also integrate https://datalossdb.org and/or
   http://thepasswordproject.com/leaked_password_lists_and_dictionaries
 
-- `gpwbunny` is not perfect, since it relies on input from the terminal if the
-  user enters a wrong password (you can't use it from a shortcut).
-
-- Include a function to measure password strength (zxcvb?)
-
-- Some way to go to an URL/address, immediately copy user/password as well?
-
 - Allow settings in ~/
-
-- Add `.desktop` file.
 
 - Prepare for unexpected inquisitions.
 
@@ -259,8 +268,17 @@ Get contents of clipboard.
 - `PwbunnyOpen()`  
 Detect is the correct password was entered.
 
-- `PwbunnyFindCopyClose(name)`
+- `PwbunnyFindCopyClose(name)`  
 Find an entry by name, copy it to the clipboard, and exit.
+
+- `PwbunnyGoto(site)`  
+Try to open `site` in a web browser (this uses `gx`).
+
+- `PwbunnyEstimatePassword(site, user, password)`  
+Estimate password strength; requires [python-zxcvbn](https://github.com/dropbox/python-zxcvbn) (mapped to `<Leader>e`).
+
+- `PwbunnyEstimateAllPasswords()`  
+Estimate password strength of all passwords (mapped to `<Leader>E`)
 
 
 Alternatives

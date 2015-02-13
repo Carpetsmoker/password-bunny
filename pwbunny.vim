@@ -19,6 +19,9 @@ nnoremap <Leader>C :call PwbunnyEmptyClipboard()<CR>
 nnoremap <Leader>p :echo PwbunnyMakePassword()<CR>
 nnoremap <Leader>P :put=PwbunnyMakePassword()<CR>
 nnoremap <Leader>s :call PwbunnySort()<CR>
+nnoremap <Leader>g :call PwbunnyGoto(PwbunnyGetSite())<CR>
+nnoremap <Leader>e :echo 'Score: ' . PwbunnyEstimatePassword(PwbunnyGetSite(), PwbunnyGetUser(), PwbunnyGetPassword())<CR>
+nnoremap <Leader>E :call PwbunnyEstimateAllPasswords()<CR>
 
 
 """
@@ -38,17 +41,18 @@ let s:emptyclipboard = 10
 " Length of generated passwords
 let s:passwordlength = 15
 
+" Minimal password score. 4 is recommended, 3 is acceptable, 2 or lower is
+" strongly discouraged
+let s:min_password_strength = 4
+
 " Sort entries after adding a new one
 let s:autosort = 1
 
 " Try and see if we can access the clipboard
 " You could set this manually for a better startup time if you're using a
 " commandline utility`
-" TODO: Are clipboard *and* xterm_clipboard really required? Figure out the
-" difference...
 let s:copymethod = has('clipboard') && has('xterm_clipboard')
 
-" TODO: Also test if these tools actually work
 if s:copymethod == '0'
 	if system('which xclip > /dev/null && echo -n 0 || echo -n 1') == '0'
 		let s:copymethod = 'xclip'
@@ -403,15 +407,25 @@ fun! PwbunnyCopyPassword()
 		let l:i = 0
 		let l:wait = s:emptyclipboard * 10
 
-		" If we sleep in steps of 1s, pasting has a delay of 1s
-		while l:i < l:wait
-			echon "\rClipboard will be emptied in " . ((l:wait - l:i) / 10) . " seconds (^C to cancel, Enter to empty now)"
-			execute "sleep 100m"
-			if getchar(0) == 10
-				break
-			endif
-			let l:i += 1
-		endwhile
+		" This will cause problems if the terminal window is too small (<65
+		" chars), should be very rare, but just in case
+		let l:oldmore = &more
+		set nomore
+
+		try
+			" If we sleep in steps of 1s, pasting has a delay of 1s
+			while l:i < l:wait
+				echon "\rClipboard will be emptied in " . ((l:wait - l:i) / 10) . "s (^C to cancel, Enter to empty now)"
+				execute "sleep 100m"
+				let l:char = getchar(0)
+				if l:char == 10 || l:char == 13
+					break
+				endif
+				let l:i += 1
+			endwhile
+		finally
+			let &more = l:oldmore
+		endtry
 
 		call PwbunnyEmptyClipboard()
 	endif
@@ -550,16 +564,75 @@ fun! PwbunnyGetClipboard()
 endfun
 
 
+" Try to open domain in browser
+fun! PwbunnyGoto(site)
+	let l:site = a:site
+	if l:site !~? '^https\?:\/\/'
+		let l:site = 'https://' . l:site
+	endif
+
+	" TODO: How to pass l:site...?
+	exe 'normal gx'
+endfun
+
+
+" Estimate strenght of a password
+fun! PwbunnyEstimatePassword(site, user, password)
+	fun! s:esc(s)
+		" TODO: Fix this ... Python code in shell exec -> not easy to escape!
+		return a:s
+	endfun
+
+	" TODO: Maybe split weak list more? Not sure how zxcvbn handles this...
+	" https://github.com/dropbox/python-zxcvbn
+	let l:pycode = printf('import zxcvbn as z; print(z.password_strength("%s", ["%s", "%s"])["score"])',
+		\ s:esc(a:password),
+		\ s:esc(a:site),
+		\ s:esc(a:user))
+	let l:score = system("python2 -c '" . l:pycode . "'")
+
+	" TODO: Also support (they should all output the same):
+	" https://github.com/dropbox/zxcvbn
+	" https://github.com/envato/zxcvbn-ruby
+
+	return l:score
+endfun
+
+
+fun! PwbunnyEstimateAllPasswords()
+	" TODO
+endfun
+
+
 " If there are less than 3 + (bytes / 100) newlines, we assume the password
 " is incorrect, and we're displaying a bunch of gibberish. Quit, and try
 " again
 fun! PwbunnyOpen()
-	if getline(1) != '' && line("$") < 3 + (line2byte(line("$")) / 100)
-		" User pressed ^C
-		if strpart(getline("."), 0, 12) == "VimCrypt~02!"
-			quit!
-		else
-			cquit!
+	fun! s:seems_okay()
+		return !(getline(1) != '' && line("$") < 3 + (line2byte(line("$")) / 100))
+	endfun
+
+	" gVim
+	if has("gui_running")
+		while 1
+			if s:seems_okay()
+				break
+			endif
+
+			set key=
+			edit
+		endwhile
+	" From terminal, exit and let the shell script show a message
+	" advantage over re-setting key is that we can ^C out of this, which is not
+	" possible with the above (maybe we can hack that, though? Would be cool)
+	else
+		if !s:seems_okay()
+			" User pressed ^C
+			if strpart(getline("."), 0, 12) == "VimCrypt~03!"
+				quit!
+			else
+				cquit!
+			endif
 		endif
 	endif
 endfun
@@ -568,7 +641,6 @@ endfun
 " Let's go!
 call PwbunnyOpen()
 call PwbunnyFold()
-
 
 " The MIT License (MIT)
 "
