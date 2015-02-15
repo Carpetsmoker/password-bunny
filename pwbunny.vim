@@ -111,20 +111,27 @@ setlocal updatecount=200
 """ Functions
 """
 
-" TODO: Make entries with a group with & without the groupname
+" Find an entry, copy it to the clipboard, and exit Pwbunny
 fun! PwbunnyFindCopyClose(name)
 	let l:sstr = "/^\\n" . a:name
 	try
 		execute l:sstr
+	" Try again, but skip group names
 	catch /^Vim\%((\a\+)\)\=:E385/
-		" TODO: ideally, I'd like to exit with status 2, and do this in the
-		" shell script... exiting Vim with an exit status other than 0 or 1
-		" doesn't seem possible, though...
+		let l:sstr = '/^\n^\w\+: ' . a:name
+		echo l:sstr
 		try
-			echohl ErrorMsg | echo "Entry not found" | echohl None
-			call input('press enter to exit')
-		finally
-			execute ":q"
+			execute l:sstr
+		catch /^Vim\%((\a\+)\)\=:E385/
+			" TODO: ideally, I'd like to exit with status 2, and do this in the
+			" shell script... exiting Vim with an exit status other than 0 or 1
+			" doesn't seem possible, though...
+			try
+				echohl ErrorMsg | echo "Entry not found" | echohl None
+				call input('press enter to exit')
+			finally
+				execute ":q"
+			endtry
 		endtry
 	endtry
 
@@ -250,106 +257,6 @@ endfun
 " Get the password of the current entry
 fun! PwbunnyGetPassword()
 	return PwbunnyGetLine(3)
-endfun
-
-
-" Get metadata of the current entry; if there is none, return 0
-" TODO: This is not just slow, it also duplicates a whole lot of
-" PwbunnyGetline()
-fun! PwbunnyGetMetadata()
-	let l:folded = foldclosed(".")
-
-	if search("^$", "Wb") == 0
-		normal 1G
-	else
-		normal j
-	endif
-
-	if l:folded > -1
-		normal zo
-	endif
-
-	let l:val = 0
-	while 1
-		let l:line = getline(".")
-
-		if l:line[0:3] == "~!!~"
-			let l:val = l:line
-			break
-		end
-
-		if l:line == "" || line("$") == line(".")
-			break
-		endif
-
-		normal j
-	endwhile
-
-	if l:folded > -1
-		normal zc
-	endif
-
-	let l:val = substitute(l:val, "\n$", "", "")[4:]
-
-	let l:new = {}
-	for m in map(split(l:val, ";"), "split(v:val, \":\")")
-		let l:new[m[0]] = m[1]
-	endfor
-
-	return l:new == {} ? 0 : l:new
-endfun
-
-
-" Set metadata key to value
-" TODO: This is not just slow, it also duplicates a whole lot of
-" PwbunnyGteMetadata() & PwbunnyGetline()
-fun! PwbunnySetMetadata(key, value)
-	let l:folded = foldclosed(".")
-
-	if search("^$", "Wb") == 0
-		normal 1G
-	else
-		normal j
-	endif
-
-	if l:folded > -1
-		normal zo
-	endif
-
-	let l:val = 0
-	while 1
-		let l:line = getline(".")
-
-		if l:line[0:3] == "~!!~"
-			let l:val = l:line
-			break
-		end
-
-		if l:line == "" || line("$") == line(".")
-			break
-		endif
-
-		normal j
-	endwhile
-
-	if l:folded > -1
-		normal zc
-	endif
-
-	let l:val = substitute(l:val, "\n$", "", "")[4:]
-
-	let l:new = {}
-	for m in map(split(l:val, ";"), "split(v:val, \":\")")
-		let l:new[m[0]] = m[1]
-	endfor
-
-	let l:new[a:key] = a:value
-	let l:write = []
-	for k in keys(l:new)
-		call add(l:write, k . ":" . l:new[k])
-	endfor
-
-	call setline(".", "~!!~" . join(l:write, ";"))
 endfun
 
 
@@ -483,7 +390,6 @@ endfun
 
 " Get list of all entries, as [startline, endline]
 " TODO: This has the side-effect of moving the cursor to line 1
-" If all_data is 1, we get the contents of the lines & parse the metadata
 fun! PwbunnyGetEntries()
 	let l:ret = []
 
@@ -640,6 +546,7 @@ endfun
 " Let's go!
 call PwbunnyOpen()
 call PwbunnyFold()
+
 
 " The MIT License (MIT)
 "

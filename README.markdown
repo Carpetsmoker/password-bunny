@@ -159,10 +159,6 @@ The file format is simple:
   notes, answers to ‘security questions’ (which should also be random), and
   other extra data (e.g. SSH fingerprints).
 
-- Any line starting with `~!!~` is considered to be metadata; this line is
-  *optional*, and *may* occur anywhere after the 3rd line. An entry *cannnot*
-  have more than 1 such line.
-
 
 Changelog
 =========
