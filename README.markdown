@@ -37,6 +37,25 @@ Or you can set these options for a host in your `~/.ssh/config`:
 		ForwardX11 yes
 		ForwardX11Trusted yes
 
+
+Password strength checking
+==========================
+Pwbunny can also check the strength of passwords. This requires either Python
+or Ruby support, and the he "zxcvbn" module for the language. Which you can find
+here:
+
+- [python-zxcvbn](https://github.com/dropbox/python-zxcvbn)
+- [zxcvbn-ruby](https://github.com/envato/zxcvbn-ruby)
+
+The result is a number from 0 to 4, where:
+
+- 0. 100 seconds (very bad)
+- 1. 2.5 hours (bit better, but still bad)
+- 2. 11 days (okay-ish)
+- 3. 3 years (good)
+- 4. Infinity (bery good)
+
+
 Security
 ========
 - The file is encrypted with [blowfish][blf], which should be secure, although
@@ -134,7 +153,7 @@ Sort entries after adding a new one (default: 1).
 	- 1. 2.5 hours (bit better, but still bad)
 	- 2. 11 days (okay-ish)
 	- 3. 3 years (good)
-	- 4. Infinity (Very good)
+	- 4. Infinity (very good)
 
 A score of 4 is recommended (this is the default), 3 is acceptable, 2 or lower
 is strongly discouraged
@@ -169,7 +188,8 @@ Latest source
 
 - Try to use `pbcopy`/`pbpaste` (for OSX)
 
-- [`cm=blowfish` has been discovered to be insecure][vuln]
+- [`cm=blowfish` has been discovered to be insecure][vuln]; warn for this, and
+  use `cm=blowfish2`.
 
 - Add `-c` command-line option to find an entry, copy it to the clipboard, and
   exit immediately *(patch by yggdr)*.
