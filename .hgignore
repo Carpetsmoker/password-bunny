@@ -2,3 +2,4 @@ syntax: glob
 passwords*
 *.pwbunny
 *.bak
+*.swp

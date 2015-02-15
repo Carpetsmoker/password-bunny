@@ -415,7 +415,6 @@ endfun
 
 
 " Copy str to clipboard
-" TODO: Backslash fails!
 fun! PwbunnyCopyToClipboard(str)
 	fun! s:esc(s)
 		return shellescape(escape(a:s, '\'))
@@ -483,29 +482,62 @@ endfun
 
 " Estimate strenght of a password
 fun! PwbunnyEstimatePassword(site, user, password)
-	fun! s:esc(s)
-		" TODO: Fix this ... Python code in shell exec -> not easy to escape!
-		return a:s
-	endfun
-
 	" TODO: Maybe split weak list more? Not sure how zxcvbn handles this...
-	" https://github.com/dropbox/python-zxcvbn
-	let l:pycode = printf('import zxcvbn as z; print(z.password_strength("%s", ["%s", "%s"])["score"])',
-		\ s:esc(a:password),
-		\ s:esc(a:site),
-		\ s:esc(a:user))
-	let l:score = system("python2 -c '" . l:pycode . "'")
 
-	" TODO: Also support (they should all output the same):
-	" https://github.com/dropbox/zxcvbn
-	" https://github.com/envato/zxcvbn-ruby
+	let l:method = 'none'
+
+	if has('python') || has('python3')
+		try
+			python import vim, zxcvbn
+			let l:method = 'python'
+		catch
+		endtry
+	endif
+
+	if !l:method && has('ruby')
+		try
+			ruby require 'zxcvbn'
+			let l:method = 'ruby'
+		catch
+		endtry
+	endif
+
+	if l:method == 'python'
+		python import vim, zxcvbn
+		python score = zxcvbn.password_strength(vim.eval('a:password'), [vim.eval('a:site'), vim.eval('a:user')])['score']
+		python vim.command('let l:score = %s' % score)
+	elseif l:method == 'ruby'
+		ruby require 'zxcvbn'
+		ruby VIM.command("let l:score = #{Zxcvbn.test(VIM.evaluate('a:password'), [VIM.evaluate('a:site'), VIM.evaluate('a:user')]).score}")
+	else
+		echoerr "This requires either Python or Ruby support, and the zxcvbn module for this language (see README)"
+		return -1
+	endif
 
 	return l:score
 endfun
 
 
 fun! PwbunnyEstimateAllPasswords()
-	" TODO
+	let l:bad = []
+	for e in PwbunnyGetEntries()
+		call cursor(e[0], 0)
+		let l:site = PwbunnyGetSite()
+		let l:score = PwbunnyEstimatePassword(l:site, PwbunnyGetUser(), PwbunnyGetPassword())
+		if l:score < s:min_password_strength
+			call add(l:bad, l:score . "    " . l:site)
+		endif
+	endfor
+
+	call sort(l:bad)
+	if len(l:bad) == 0
+		echo "All your passwords have a minimum score of " . s:min_password_strength . "."
+	else
+		echo "The following passwords have a score lower than " . s:min_password_strength . ":"
+		for b in l:bad
+			echo l:b
+		endfor
+	endif
 endfun
 
 
