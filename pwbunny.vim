@@ -13,14 +13,14 @@
 """
 
 nnoremap <Leader>a :call PwbunnyAddEntry()<CR>
+nnoremap <Leader>g :call PwbunnyGoto(PwbunnyGetSite())<CR>
 nnoremap <Leader>c :call PwbunnyCopyPassword()<CR>
 nnoremap <Leader>u :call PwbunnyCopyUserAndPassword()<CR>
 nnoremap <Leader>C :call PwbunnyEmptyClipboard()<CR>
 nnoremap <Leader>p :echo PwbunnyMakePassword()<CR>
 nnoremap <Leader>P :put=PwbunnyMakePassword()<CR>
 nnoremap <Leader>s :call PwbunnySort()<CR>
-nnoremap <Leader>g :call PwbunnyGoto(PwbunnyGetSite())<CR>
-nnoremap <Leader>e :echo 'Score: ' . PwbunnyEstimatePassword(PwbunnyGetSite(), PwbunnyGetUser(), PwbunnyGetPassword())<CR>
+nnoremap <Leader>e :echo 'Score: ' . PwbunnyEstimatePassword(PwbunnyGetSite(), PwbunnyGetUser(), PwbunnyGetPassword(), 1)<CR>
 nnoremap <Leader>E :call PwbunnyEstimateAllPasswords()<CR>
 
 
@@ -71,6 +71,9 @@ if s:copymethod == '0'
 	endif
 endif
 
+setlocal foldmethod=expr
+setlocal foldexpr=getline(v:lnum)=~'^\\s*$'&&getline(v:lnum+1)=~'\\S'?'<1':1
+
 " Only open fold explicitly (with zo or insert commands)
 setlocal foldopen=
 
@@ -95,6 +98,12 @@ setlocal cryptmethod=blowfish2
 
 " VimInfo file isn't encrypted, and may possible leak data
 setlocal viminfo=
+
+" Don't create temp files for shell commands
+set noshelltemp
+
+" Disallow autocmd, shell commands, and write commands in the vimrc file
+set secure
 
 " Make sure we keep the backup & swap file in the same directory, they're
 " encrypted, but we don't want them dangling around in tmp dirs
@@ -141,15 +150,6 @@ fun! PwbunnyFindCopyClose(name)
 	finally
 		execute ":q"
 	endtry
-endfun
-
-" Make folds
-fun! PwbunnyFold()
-	normal zE
-	for e in PwbunnyGetEntries()
-		execute e[0] . "," . e[1] . "fold"
-	endfor
-	normal zc
 endfun
 
 
@@ -233,12 +233,15 @@ fun! PwbunnyAddEntry()
 		normal dd
 	endif
 
-	call PwbunnyFold()
-
 	if exists("s:autosort") && s:autosort
 		call PwbunnySort()
 	endif
-	execute "w"
+	silent execute "w"
+
+	let l:score = PwbunnyEstimatePassword(l:site, l:user, l:pass, 0)
+	if l:score >= 0 && l:score < s:min_password_strength
+		echoerr "Warning: The score for this password is " . l:score . " which is lower than the configured minimum score of " . s:min_password_strength . " (but we've saved your password anyway)."
+	endif
 endfun
 
 
@@ -353,10 +356,6 @@ endfun
 
 " Sort entries
 fun! PwbunnySort()
-	" We need everything to be folded for this to work
-	" TODO: Ideally, this shouldn't really be required
-	call PwbunnyFold()
-
 	let l:names = []
 	for e in PwbunnyGetEntries()
 		call cursor(e[0], 0)
@@ -384,32 +383,28 @@ fun! PwbunnySort()
 	if getline(1) == ''
 		normal 1Gdd
 	endif
-	call PwbunnyFold()
 endfun
 
 
 " Get list of all entries, as [startline, endline]
-" TODO: This has the side-effect of moving the cursor to line 1
 fun! PwbunnyGetEntries()
+	let l:cursor_save = getpos(".")
 	let l:ret = []
-
 	normal 1G
+
 	while 1
 		let l:start = line(".")
+		let l:end = foldclosedend(".")
+		call add(l:ret, [l:start, l:end])
 
-		let [l:emptyline, l:col] = searchpos("^$", "W")
-		let [l:nemptyline, l:col] = searchpos("^[^$]", "W")
-
-		" Last entry
-		if l:emptyline == 0 || l:nemptyline == 0
-			call add(l:ret, [l:start, line("$")])
+		if l:end == line('$')
 			break
 		endif
 
-		call add(l:ret, [l:start, l:nemptyline - 1])
+		execute 'normal ' . (l:end + 1) . 'G'
 	endwhile
 
-	normal 1G
+	call setpos(".", l:cursor_save)
 	return l:ret
 endfun
 
@@ -481,7 +476,7 @@ endfun
 
 
 " Estimate strenght of a password
-fun! PwbunnyEstimatePassword(site, user, password)
+fun! PwbunnyEstimatePassword(site, user, password, warn)
 	" TODO: Maybe split weak list more? Not sure how zxcvbn handles this...
 
 	let l:method = 'none'
@@ -510,7 +505,9 @@ fun! PwbunnyEstimatePassword(site, user, password)
 		ruby require 'zxcvbn'
 		ruby VIM.command("let l:score = #{Zxcvbn.test(VIM.evaluate('a:password'), [VIM.evaluate('a:site'), VIM.evaluate('a:user')]).score}")
 	else
-		echoerr "This requires either Python or Ruby support, and the zxcvbn module for this language (see README)"
+		if a:warn
+			echoerr "This requires either Python or Ruby support, and the zxcvbn module for this language (see README)"
+		endif
 		return -1
 	endif
 
@@ -523,7 +520,10 @@ fun! PwbunnyEstimateAllPasswords()
 	for e in PwbunnyGetEntries()
 		call cursor(e[0], 0)
 		let l:site = PwbunnyGetSite()
-		let l:score = PwbunnyEstimatePassword(l:site, PwbunnyGetUser(), PwbunnyGetPassword())
+		let l:score = PwbunnyEstimatePassword(l:site, PwbunnyGetUser(), PwbunnyGetPassword(), 1)
+		" Unsupported, no sense in going on
+		if l:score == -1 | break | endif
+
 		if l:score < s:min_password_strength
 			call add(l:bad, l:score . "    " . l:site)
 		endif
@@ -553,6 +553,7 @@ fun! PwbunnyOpen()
 	if has("gui_running")
 		while 1
 			if s:seems_okay()
+				normal zc
 				break
 			endif
 
@@ -570,6 +571,8 @@ fun! PwbunnyOpen()
 			else
 				cquit!
 			endif
+		else
+			normal zc
 		endif
 	endif
 endfun
@@ -577,7 +580,6 @@ endfun
 
 " Let's go!
 call PwbunnyOpen()
-call PwbunnyFold()
 
 
 " The MIT License (MIT)
