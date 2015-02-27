@@ -1,6 +1,8 @@
 Manage passwords with Vim.
 
-You will need Vim 7.3 or later.
+You will need Vim 7.4.399 or later (Vim 7.3 will also work, but has a flaw in
+the blowfish implementation and is *not* secure; we will warn for this).
+
 This program was tested on FreeBSD & Arch Linux; it will *probably* also work on
 other POSIX systems (OpenBSD, MacOSX, Other Linuxes, etc.). It will *not* work
 on Windows.
@@ -41,39 +43,36 @@ Or you can set these options for a host in your `~/.ssh/config`:
 Password strength checking
 ==========================
 Pwbunny can also check the strength of passwords. This requires either Python
-or Ruby support, and the he "zxcvbn" module for the language. Which you can find
+or Ruby support, and the he “zxcvbn” module for the language. Which you can find
 here:
 
 - [python-zxcvbn](https://github.com/dropbox/python-zxcvbn)
 - [zxcvbn-ruby](https://github.com/envato/zxcvbn-ruby)
 
-The result is a number from 0 to 4, where:
+The result is a number from 0 to 4, which represents an estimation of the crack
+time:
 
 - 0. 100 seconds (very bad)
 - 1. 2.5 hours (bit better, but still bad)
 - 2. 11 days (okay-ish)
 - 3. 3 years (good)
-- 4. Infinity (bery good)
+- 4. Infinity (very good)
 
 
 Security
 ========
 - The file is encrypted with [blowfish][blf], which should be secure, although
-  it is possible that the Vim implementation may be incorrect (a serious
+  it is possible that the Vim implementation may be incorrect (a
   [vulnerability][vuln] was discovered, and fixed, in August 2014).
 
 - Your system’s memory will contain the plaintext contents. You should only run
-  this program on trusted machines (ie. not a shared host or the like).
+  this program on trusted machines (i.e. not a shared host or the like).
 
-- PwBunny uses the system’s clipboard extensively to get the passwords to your
-  applications (eg. browser); you should be aware that *any* program can read
+- Pwbunny uses the system’s clipboard extensively to get the passwords to your
+  applications (e.g. browser); you should be aware that *any* program can read
   the clipboard, including malicious clipboard snoopers (as well as
   non-malicious snoopers, which may store their clipboard history database as
   world-readable in plain text).
-
-- We issue no warnings against unwise passwords (either as master password for
-  the file, or passwords for the sites you add). It’s *your* responsibility to
-  choose good passwords. You *should* use the built-in password generator.
 
 - Using `ForwardX11Trusted` effectively gives the server complete control over
   the machine you’re connecting with, which may be a **serious** security
@@ -123,8 +122,7 @@ horrible and 4=superb.
 Show an estimation of all the password strengths that are lower than
 `s:min_password_strength`.
 
-
-By default, Vim maps `<Leader>` to `\`.
+PS. By default, Vim maps `<Leader>` to `\`.
 
 
 Settings
@@ -147,13 +145,8 @@ Length of generated passwords (default: 15).
 Sort entries after adding a new one (default: 1).
 
 - `s:min_password_strength = 4`  
-	Minimal passwords strength, score of 0 to 4 based on a estimation of the actual
-	crack time in:
-	- 0. 100 seconds (very bad)
-	- 1. 2.5 hours (bit better, but still bad)
-	- 2. 11 days (okay-ish)
-	- 3. 3 years (good)
-	- 4. Infinity (very good)
+Minimal passwords strength, score of 0 to 4 based on a estimation of the actual
+crack time. See ‘Password strength checking’ above.
 
 A score of 4 is recommended (this is the default), 3 is acceptable, 2 or lower
 is strongly discouraged
@@ -168,11 +161,12 @@ The file format is simple:
 - An entry *must* be followed by 1 or more empty lines; except for the last
   entry, where an empty line is *optional*.
 
-- The 1st line *must* be the title and *must* be present. This line also doubles as the domain.
+- The first line *must* be the title and *must* be present. This line also
+  doubles as the domain.
 
-- The 2nd line *must* be the username, and *may* be blank.
+- The second line *must* be the username, and *may* be blank.
 
-- The 3rd line *must* be the password, and *may* be blank.
+- The third line *must* be the password, and *may* be blank.
 
 - An entry *may* have as many lines as desired. This is useful for storing
   notes, answers to ‘security questions’ (which should also be random), and
@@ -182,65 +176,41 @@ The file format is simple:
 Changelog
 =========
 
-Latest source
--------------
-- Add `Makefile` *(patch by yggdr)*.
-
-- Try to use `pbcopy`/`pbpaste` (for OSX)
+Version 1.1, 20150227
+---------------------
+There are many new options, features, and improvements. With thanks to *yggdr*
+for some patches; the most important changes are:
 
 - [`cm=blowfish` has been discovered to be insecure][vuln]; warn for this, and
   use `cm=blowfish2`.
-
-- Add `-c` command-line option to find an entry, copy it to the clipboard, and
-  exit immediately *(patch by yggdr)*.
-
-- Add `<Leader>P` to insert a random password at the cursor position *(patch by
-  yggdr)*.
-
-- Add option `l:defaultuser` to set a default username.
-
-- Add option `l:site_from_clipboard` use the clipboard contents as default site.
-
-- Add option `l:autosort` to sort automatically sort entries after adding a new
-  one.
-
-- Add `gpwbunny` to use gVim.
 
 - Use `~/.pwbunny/passwords.pwbunny` as the default file; `./passwords.pwbunny`
   is used if it exists.
 
 - `pwbunny.vim` is now used from `/usr/share/pwbunny/pwbunny.vim` if
-  `./pwbunny.vim` doesn't exist.
-
-- Fix a few minor bugs.
+  `./pwbunny.vim` doesn’t exist.
 
 
-1.0, 20140510
--------------
+Version 1.0, 20140510
+---------------------
 - Initial release.
 
 
 TODO
 ====
-- Undo after `PwbunnySort()` removes all folds... Not sure how we can fix
-  this...
-
 - Write some tests (http://usevim.com/2012/10/17/vim-unit-tests/).
 
 - A tool to regenerate passwords, and/or store when they were last changed,
   perhaps also integrate https://datalossdb.org and/or
   http://thepasswordproject.com/leaked_password_lists_and_dictionaries
 
-- Allow settings in ~/
+- Allow settings in `~/`, now you have to modify the script to change settings.
 
 - Prepare for unexpected inquisitions.
 
 
 Functions
 =========
-- `PwbunnyFold()`  
-Remove & recreate all folds. This is called on startup.
-
 - `PwbunnyMakePassword()`  
 Generate a random password (mapped to `<Leader>p`).
 
@@ -291,10 +261,10 @@ Find an entry by name, copy it to the clipboard, and exit.
 Try to open `site` in a web browser (this uses `gx`).
 
 - `PwbunnyEstimatePassword(site, user, password)`  
-Estimate password strength; requires [python-zxcvbn](https://github.com/dropbox/python-zxcvbn) (mapped to `<Leader>e`).
+Estimate password strength (mapped to `<Leader>e`).
 
 - `PwbunnyEstimateAllPasswords()`  
-Estimate password strength of all passwords (mapped to `<Leader>E`)
+Estimate password strength of all passwords (mapped to `<Leader>E`).
 
 
 Alternatives
