@@ -52,11 +52,11 @@ here:
 The result is a number from 0 to 4, which represents an estimation of the crack
 time:
 
-- 0. 100 seconds (very bad)
-- 1. 2.5 hours (bit better, but still bad)
+- 0: 100 seconds (very bad)
+- 1: 2.5 hours (bit better, but still bad)
 - 2. 11 days (okay-ish)
-- 3. 3 years (good)
-- 4. Infinity (very good)
+- 3: 3 years (good)
+- 4: Infinity (very good)
 
 
 Security
@@ -176,8 +176,8 @@ The file format is simple:
 Changelog
 =========
 
-Version 1.1, 20150227
----------------------
+Version 1.1, 2015-02-27
+-----------------------
 There are many new options, features, and improvements. With thanks to *yggdr*
 for some patches; the most important changes are:
 
@@ -191,8 +191,8 @@ for some patches; the most important changes are:
   `./pwbunny.vim` doesn’t exist.
 
 
-Version 1.0, 20140510
----------------------
+Version 1.0, 2014-05-10
+-----------------------
 - Initial release.
 
 
