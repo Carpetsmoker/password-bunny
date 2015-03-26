@@ -8,26 +8,32 @@
 # See below for full copyright
 #
 
-version="1.1"
+version="1.2"
 
 usage() {
-	echo "Usage: $(basename "$0") [-v] [-s file] [-c entryname] [file]"
+	echo "Usage: $(basename "$0") [-vp] [-s file] [-c entryname] [file]"
 	echo
-	echo "  -h     Show this help"
-	echo "  -v     Show version and exit"
-	echo "  -c     TODO"
-	echo "  -s     Specify location of pwbunny.vim; defaults to TODO"
-	echo "  file   File to open, defaults to TODO"
+	echo "  -h       Show this help"
+	echo "  -v       Show version and exit"
+	echo "  -c name  Find entry by name, copy it to the clipboard, and exit"
+	echo "  -p       \"Private\" mode; don't show anything as the foldtext"
+	echo "  -s       Specify location of pwbunny.vim; defaults to TODO"
+	echo "  file     File to open, defaults to TODO"
 	echo
 }
 
-while getopts ":c:hv" option; do
+private=""
+getpwarg=""
+while getopts ":c:hvp" option; do
 	case $option in
 		c)
 			getpwarg="| call PwbunnyFindCopyClose('"$OPTARG"')"
 			;;
 		s)
 			vimfile="$OPTARG"
+			;;
+		p)
+			private="| call PwbunnySetPrivate()"
 			;;
 		h)
 			usage
@@ -134,7 +140,7 @@ fi
 
 while :; do
 	vim $args -n \
-		-c "source $vimfile $getpwarg"  \
+		-c "source $vimfile $getpwarg $private"  \
 		"$file"
 
 	[ $? -eq 0 ] && break

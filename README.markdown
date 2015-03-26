@@ -148,6 +148,9 @@ Sort entries after adding a new one (default: 1).
 Minimal passwords strength, score of 0 to 4 based on a estimation of the actual
 crack time. See ‘Password strength checking’ above.
 
+- `s:private = 0`  
+Start ‘private mode’ by default (name of site isn’t displayed in the fold text).
+
 A score of 4 is recommended (this is the default), 3 is acceptable, 2 or lower
 is strongly discouraged
 
@@ -175,6 +178,11 @@ The file format is simple:
 
 Changelog
 =========
+
+Latest source
+-------------
+- Add `-p` option for 'private mode', this won’t display the site name in the
+  fold.
 
 Version 1.1, 2015-02-27
 -----------------------
@@ -265,6 +273,9 @@ Estimate password strength (mapped to `<Leader>e`).
 
 - `PwbunnyEstimateAllPasswords()`  
 Estimate password strength of all passwords (mapped to `<Leader>E`).
+
+- `PwbunnySetPrivate()`  
+Set ‘private mode’. The names of the sites isn’t displayed in the fold text.
 
 
 Alternatives

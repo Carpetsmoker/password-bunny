@@ -48,6 +48,9 @@ let s:min_password_strength = 4
 " Sort entries after adding a new one
 let s:autosort = 1
 
+" Start private mode by default
+let s:private = 0
+
 " Try and see if we can access the clipboard
 " You could set this manually for a better startup time if you're using a
 " commandline utility`
@@ -82,6 +85,7 @@ setlocal foldclose=all
 
 " Display less info on closed folds
 setlocal foldtext=getline(v:foldstart)
+
 setlocal fillchars=""
 
 
@@ -541,6 +545,11 @@ fun! PwbunnyEstimateAllPasswords()
 endfun
 
 
+fun! PwbunnySetPrivate()
+	setlocal foldtext=
+endfun
+
+
 " If there are less than 3 + (bytes / 100) newlines, we assume the password
 " is incorrect, and we're displaying a bunch of gibberish. Quit, and try
 " again
@@ -554,6 +563,7 @@ fun! PwbunnyOpen()
 		while 1
 			if s:seems_okay()
 				normal zc
+				if s:private | call PwbunnySetPrivate() | endif
 				break
 			endif
 
