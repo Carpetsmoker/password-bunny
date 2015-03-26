@@ -1,4 +1,3 @@
-"
 " password bunny: Manage passwords with Vim
 "
 " http://code.arp242.net/password-bunny
@@ -7,6 +6,7 @@
 " See below for full copyright
 "
 
+scriptencoding utf-8
 
 """
 """ Keybinds
@@ -56,19 +56,19 @@ let s:private = 0
 " commandline utility`
 let s:copymethod = has('clipboard') && has('xterm_clipboard')
 
-if s:copymethod == '0'
-	if system('which xclip > /dev/null && echo -n 0 || echo -n 1') == '0'
+if s:copymethod ==# '0'
+	if system('which xclip > /dev/null && echo -n 0 || echo -n 1') ==# '0'
 		let s:copymethod = 'xclip'
-	elseif system('which xcopy > /dev/null && echo -n 0 || echo -n 1') == '0'
+	elseif system('which xcopy > /dev/null && echo -n 0 || echo -n 1') ==# '0'
 		let s:copymethod = 'xcopy'
-	elseif system('which pbcopy > /dev/null && echo -n 0 || echo -n 1') == '0'
+	elseif system('which pbcopy > /dev/null && echo -n 0 || echo -n 1') ==# '0'
 		let s:copymethod = 'pbcopy'
-	elseif system('which xsel > /dev/null && echo -n 0 || echo -n 1') == '0'
+	elseif system('which xsel > /dev/null && echo -n 0 || echo -n 1') ==# '0'
 		let s:copymethod = 'xsel'
 
 		" Newer xsel, which is an `improved' version, but has incompatible
 		" switches..! (why do people do this sort of thing...!?!?)
-		if system('xsel --version > /dev/null && echo -n 0 || echo -n 1') == '0'
+		if system('xsel --version > /dev/null && echo -n 0 || echo -n 1') ==# '0'
 			let s:copymethod = 'xsel-new'
 		endif
 	endif
@@ -85,7 +85,6 @@ setlocal foldclose=all
 
 " Display less info on closed folds
 setlocal foldtext=getline(v:foldstart)
-
 setlocal fillchars=""
 
 
@@ -140,31 +139,31 @@ fun! PwbunnyFindCopyClose(name)
 			" shell script... exiting Vim with an exit status other than 0 or 1
 			" doesn't seem possible, though...
 			try
-				echohl ErrorMsg | echo "Entry not found" | echohl None
+				echohl ErrorMsg | echo 'Entry not found' | echohl None
 				call input('press enter to exit')
 			finally
-				execute ":q"
+				execute ':q'
 			endtry
 		endtry
 	endtry
 
-	normal j
+	normal! j
 	try
 		call PwbunnyCopyPassword()
 	finally
-		execute ":q"
+		execute ':q'
 	endtry
 endfun
 
 
 " Generate a random password
 fun! PwbunnyMakePassword()
-	if !exists("s:passwordlength")
+	if !exists('s:passwordlength')
 		let s:passwordlength = 15
 	endif
 
 	" http://arp242.net/weblog/Generate_passwords_from_the_commandline.html
-	return system("strings -n 1 < /dev/urandom | tr -d '[:space:]' | head -c " . s:passwordlength)
+	return system('strings -n 1 < /dev/urandom | tr -d "[:space:]" | head -c ' . s:passwordlength)
 endfun
 
 
@@ -188,63 +187,63 @@ endfun
 
 " Add a new entry
 fun! PwbunnyAddEntry()
-	if exists("s:site_from_clipboard") && s:site_from_clipboard
+	if exists('s:site_from_clipboard') && s:site_from_clipboard
 		let l:defaultsite = PwbunnyExtractDomain(PwbunnyGetClipboard(), 1)
 
-		if l:defaultsite != ''
-			let l:site = input("Site (enter for " . l:defaultsite . "): ")
+		if l:defaultsite !=# ''
+			let l:site = input('Site (enter for ' . l:defaultsite . '): ')
 		else
-			let l:site = input("Site: ")
+			let l:site = input('Site: ')
 		endif
-		if l:site == ""
+		if l:site ==# ''
 			let l:site = l:defaultsite
 		endif
 	else
-		let l:site = input("Site: ")
+		let l:site = input('Site: ')
 	endif
 
-	if l:site == ""
-		echoerr "Site is required"
+	if l:site ==# ''
+		echoerr 'Site is required'
 		return
 	endif
 
-	if exists('s:defaultuser') && s:defaultuser != ""
-		let l:user = input("User (enter for " . s:defaultuser . "): ")
-		if l:user == ""
+	if exists('s:defaultuser') && s:defaultuser !=# ''
+		let l:user = input('User (enter for ' . s:defaultuser . '): ')
+		if l:user ==# ''
 			let l:user = s:defaultuser
 		endif
 	else
-		let l:user = input("User: ")
+		let l:user = input('User: ')
 	endif
 
-	let l:pass = input("Password (enter for random): ")
-	if l:pass == ""
+	let l:pass = input('Password (enter for random): ')
+	if l:pass ==# ''
 		let l:pass = PwbunnyMakePassword()
 	endif
 
-	if line("$") > 1
+	if line('$') > 1
 		let l:first = 0
-		call append("$", "")
+		call append('$', '')
 	else
 		let l:first = 1
 	endif
-	let l:start = line("$")
-	call append("$", l:site)
-	call append("$", l:user)
-	call append("$", l:pass)
-	call append("$", "")
+	let l:start = line('$')
+	call append('$', l:site)
+	call append('$', l:user)
+	call append('$', l:pass)
+	call append('$', '')
 	if l:first
-		normal dd
+		normal! dd
 	endif
 
-	if exists("s:autosort") && s:autosort
+	if exists('s:autosort') && s:autosort
 		call PwbunnySort()
 	endif
-	silent execute "w"
+	silent execute 'w'
 
 	let l:score = PwbunnyEstimatePassword(l:site, l:user, l:pass, 0)
 	if l:score >= 0 && l:score < s:min_password_strength
-		echoerr "Warning: The score for this password is " . l:score . " which is lower than the configured minimum score of " . s:min_password_strength . " (but we've saved your password anyway)."
+		echoerr 'Warning: The score for this password is ' . l:score . ' which is lower than the configured minimum score of ' . s:min_password_strength . ' (but we''ve saved your password anyway).'
 	endif
 endfun
 
@@ -269,31 +268,31 @@ endfun
 
 " Get line number n of an entry
 fun! PwbunnyGetLine(n)
-	let l:folded = foldclosed(".")
+	let l:folded = foldclosed('.')
 
-	if search("^$", "Wb") == 0
-		normal 1G
+	if search('^$', 'Wb') ==# 0
+		normal! 1G
 	else
-		normal j
+		normal! j
 	endif
 
 	if l:folded > -1
-		normal zo
+		normal! zo
 	endif
 
 	let l:i = 1
 	while l:i < a:n
-		normal j
+		normal! j
 		let l:i += 1
 	endwhile
 
-	let l:val = getline(".")
+	let l:val = getline('.')
 
 	if l:folded > -1
-		normal zc
+		normal! zc
 	endif
 
-	let l:val = substitute(l:val, "\n$", "", "")
+	let l:val = substitute(l:val, "\n$", '', '')
 	return l:val
 endfun
 
@@ -304,8 +303,8 @@ fun! PwbunnyCopyUserAndPassword()
 		return
 	endif
 
-	let l:pw = input("User copied; copy password (Esc or ^C for no)? ", "yes")
-	if l:pw == "yes"
+	let l:pw = input('User copied; copy password (Esc or ^C for no)? ', 'yes')
+	if l:pw ==? 'yes'
 		call PwbunnyCopyPassword()
 	endif
 endfun
@@ -317,7 +316,7 @@ fun! PwbunnyCopyPassword()
 		return
 	endif
 
-	if exists("s:emptyclipboard") && s:emptyclipboard > 0
+	if exists('s:emptyclipboard') && s:emptyclipboard > 0
 		let l:i = 0
 		let l:wait = s:emptyclipboard * 10
 
@@ -329,10 +328,10 @@ fun! PwbunnyCopyPassword()
 		try
 			" If we sleep in steps of 1s, pasting has a delay of 1s
 			while l:i < l:wait
-				echon "\rClipboard will be emptied in " . ((l:wait - l:i) / 10) . "s (^C to cancel, Enter to empty now)"
-				execute "sleep 100m"
+				echon "\rClipboard will be emptied in " . ((l:wait - l:i) / 10) . 's (^C to cancel, Enter to empty now)'
+				execute 'sleep 100m'
 				let l:char = getchar(0)
-				if l:char == 10 || l:char == 13
+				if l:char ==# 10 || l:char ==# 13
 					break
 				endif
 				let l:i += 1
@@ -354,7 +353,7 @@ fun! PwbunnyEmptyClipboard()
 		return
 	endif
 	
-	echo "Clipboard cleared"
+	echo 'Clipboard cleared'
 endfun
 
 
@@ -367,48 +366,48 @@ fun! PwbunnySort()
 	endfor
 
 	fun! s:sort(a, b)
-		return a:a[0] == a:b[0] ? 0 : a:a[0] > a:b[0] ? 1 : -1
+		return a:a[0] ==# a:b[0] ? 0 : a:a[0] > a:b[0] ? 1 : -1
 	endfun
-	call sort(l:names, "s:sort")
+	call sort(l:names, 's:sort')
 
 	let l:new = []
 	for e in l:names
 		let l:new += getline(e[1], e[2])
 
 		" Add a newline to the last entry, if it isn't there (see Issue #1)
-		if e[2] == line("$") && getline(e[2]) != ""
+		if e[2] ==# line('$') && getline(e[2]) !=# ''
 			let l:new += ['']
 		endif
 	endfor
 
-	normal 1Gd100%
-	call append(".", l:new)
+	normal! 1Gd100%
+	call append('.', l:new)
 
-	if getline(1) == ''
-		normal 1Gdd
+	if getline(1) ==# ''
+		normal! 1Gdd
 	endif
 endfun
 
 
 " Get list of all entries, as [startline, endline]
 fun! PwbunnyGetEntries()
-	let l:cursor_save = getpos(".")
+	let l:cursor_save = getpos('.')
 	let l:ret = []
-	normal 1G
+	normal! 1G
 
 	while 1
-		let l:start = line(".")
-		let l:end = foldclosedend(".")
+		let l:start = line('.')
+		let l:end = foldclosedend('.')
 		call add(l:ret, [l:start, l:end])
 
-		if l:end == line('$')
+		if l:end ==# line('$')
 			break
 		endif
 
 		execute 'normal ' . (l:end + 1) . 'G'
 	endwhile
 
-	call setpos(".", l:cursor_save)
+	call setpos('.', l:cursor_save)
 	return l:ret
 endfun
 
@@ -419,18 +418,18 @@ fun! PwbunnyCopyToClipboard(str)
 		return shellescape(escape(a:s, '\'))
 	endfun
 
-	if s:copymethod == '1'
+	if s:copymethod ==# '1'
 		let @* = a:str
-	elseif s:copymethod == 'xclip'
-		call system("echo -n " . s:esc(a:str) . " | xclip")
-	elseif s:copymethod == 'xcopy'
-		call system("echo -n " . s:esc(a:str) . " | xcopy")
-	elseif s:copymethod == 'pbcopy'
-		call system("echo -n " . s:esc(a:str) . " | pbcopy")
-	elseif s:copymethod == 'xsel'
-		call system("echo -n " . s:esc(a:str) . " | xsel -c")
-	elseif s:copymethod == 'xsel-new'
-		call system("echo -n " . s:esc(a:str) . " | xsel -i")
+	elseif s:copymethod ==? 'xclip'
+		call system('echo -n ' . s:esc(a:str) . ' | xclip')
+	elseif s:copymethod ==? 'xcopy'
+		call system('echo -n ' . s:esc(a:str) . ' | xcopy')
+	elseif s:copymethod ==? 'pbcopy'
+		call system('echo -n ' . s:esc(a:str) . ' | pbcopy')
+	elseif s:copymethod ==? 'xsel'
+		call system('echo -n ' . s:esc(a:str) . ' | xsel -c')
+	elseif s:copymethod ==? 'xsel-new'
+		call system('echo -n ' . s:esc(a:str) . ' | xsel -i')
 	else
 		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
 		return 0
@@ -443,18 +442,18 @@ endfun
 " Get clipboard contents
 " TODO: We could also use xprop -root
 fun! PwbunnyGetClipboard()
-	if s:copymethod == '1'
+	if s:copymethod ==# '1'
 		let l:contents = @*
-	elseif s:copymethod == 'xclip'
-		let l:contents = system("xclip -o")
-	elseif s:copymethod == 'xcopy'
-		let l:contents = system("xcopy -r")
-	elseif s:copymethod == 'pbcopy'
-		let l:contents = system("pbpaste -Prefer txt")
-	elseif s:copymethod == 'xsel'
-		let l:contents = system("xsel")
-	elseif s:copymethod == 'xsel-new'
-		let l:contents = system("xsel")
+	elseif s:copymethod ==? 'xclip'
+		let l:contents = system('xclip -o')
+	elseif s:copymethod ==? 'xcopy'
+		let l:contents = system('xcopy -r')
+	elseif s:copymethod ==? 'pbcopy'
+		let l:contents = system('pbpaste -Prefer txt')
+	elseif s:copymethod ==? 'xsel'
+		let l:contents = system('xsel')
+	elseif s:copymethod ==? 'xsel-new'
+		let l:contents = system('xsel')
 	else
 		echoerr "Can't access clipboard; please see the `Clipboard support' in the README file"
 		return -1
@@ -501,16 +500,17 @@ fun! PwbunnyEstimatePassword(site, user, password, warn)
 		endtry
 	endif
 
-	if l:method == 'python'
+	let l:score = -1 " Not required, but makes vint happy
+	if l:method ==? 'python'
 		python import vim, zxcvbn
 		python score = zxcvbn.password_strength(vim.eval('a:password'), [vim.eval('a:site'), vim.eval('a:user')])['score']
 		python vim.command('let l:score = %s' % score)
-	elseif l:method == 'ruby'
+	elseif l:method ==? 'ruby'
 		ruby require 'zxcvbn'
 		ruby VIM.command("let l:score = #{Zxcvbn.test(VIM.evaluate('a:password'), [VIM.evaluate('a:site'), VIM.evaluate('a:user')]).score}")
 	else
 		if a:warn
-			echoerr "This requires either Python or Ruby support, and the zxcvbn module for this language (see README)"
+			echoerr 'This requires either Python or Ruby support, and the zxcvbn module for this language (see README)'
 		endif
 		return -1
 	endif
@@ -526,18 +526,18 @@ fun! PwbunnyEstimateAllPasswords()
 		let l:site = PwbunnyGetSite()
 		let l:score = PwbunnyEstimatePassword(l:site, PwbunnyGetUser(), PwbunnyGetPassword(), 1)
 		" Unsupported, no sense in going on
-		if l:score == -1 | break | endif
+		if l:score ==# -1 | break | endif
 
 		if l:score < s:min_password_strength
-			call add(l:bad, l:score . "    " . l:site)
+			call add(l:bad, l:score . '    ' . l:site)
 		endif
 	endfor
 
 	call sort(l:bad)
-	if len(l:bad) == 0
-		echo "All your passwords have a minimum score of " . s:min_password_strength . "."
+	if len(l:bad) ==# 0
+		echo 'All your passwords have a minimum score of ' . s:min_password_strength . '.'
 	else
-		echo "The following passwords have a score lower than " . s:min_password_strength . ":"
+		echo 'The following passwords have a score lower than ' . s:min_password_strength . ':'
 		for b in l:bad
 			echo l:b
 		endfor
@@ -545,6 +545,7 @@ fun! PwbunnyEstimateAllPasswords()
 endfun
 
 
+" Enable 'private mode'
 fun! PwbunnySetPrivate()
 	setlocal foldtext=
 endfun
@@ -555,14 +556,14 @@ endfun
 " again
 fun! PwbunnyOpen()
 	fun! s:seems_okay()
-		return !(getline(1) != '' && line("$") < 3 + (line2byte(line("$")) / 100))
+		return !(getline(1) !=# '' && line('$') < 3 + (line2byte(line('$')) / 100))
 	endfun
 
 	" gVim
-	if has("gui_running")
+	if has('gui_running')
 		while 1
 			if s:seems_okay()
-				normal zc
+				normal! zc
 				if s:private | call PwbunnySetPrivate() | endif
 				break
 			endif
@@ -576,13 +577,13 @@ fun! PwbunnyOpen()
 	else
 		if !s:seems_okay()
 			" User pressed ^C
-			if strpart(getline("."), 0, 12) == "VimCrypt~03!"
+			if strpart(getline('.'), 0, 12) ==# 'VimCrypt~03!'
 				quit!
 			else
 				cquit!
 			endif
 		else
-			normal zc
+			normal! zc
 		endif
 	endif
 endfun
