@@ -54,7 +54,7 @@ time:
 
 - 0: 100 seconds (very bad)
 - 1: 2.5 hours (bit better, but still bad)
-- 2. 11 days (okay-ish)
+- 2: 11 days (okay-ish)
 - 3: 3 years (good)
 - 4: Infinity (very good)
 
