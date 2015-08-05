@@ -179,10 +179,11 @@ The file format is simple:
 Changelog
 =========
 
-Latest source
--------------
+Version 1.2, 2015-08-05
+-----------------------
 - Add `-p` option for 'private mode', this won’t display the site name in the
   fold.
+
 
 Version 1.1, 2015-02-27
 -----------------------
