@@ -86,7 +86,7 @@ elif [ "$(head -c12 "$file")" = "VimCrypt~01!" ]; then
 	echo "Press enter to continue"
 	read x
 # cm=blowfish
-elif [ "$(head -c12 "$file")" == "VimCrypt~02!" ]; then
+elif [ "$(head -c12 "$file")" = "VimCrypt~02!" ]; then
 	echo "WARNING"
 	echo "The file \`$file' uses cryptmethod=blowfish"
 	echo
