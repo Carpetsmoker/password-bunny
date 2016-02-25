@@ -179,6 +179,11 @@ The file format is simple:
 Changelog
 =========
 
+Version 1.3, 2016-02-25
+-----------------------
+- Keep more backups of the password database instead of just one.
+
+
 Version 1.2, 2015-08-05
 -----------------------
 - Add `-p` option for 'private mode', this won’t display the site name in the

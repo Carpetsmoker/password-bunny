@@ -2,7 +2,7 @@
 "
 " http://code.arp242.net/password-bunny
 "
-" Copyright © 2014-2015 Martin Tournoij <martin@arp242.net>
+" Copyright © 2014-2016 Martin Tournoij <martin@arp242.net>
 " See below for full copyright
 "
 
@@ -595,7 +595,7 @@ call PwbunnyOpen()
 
 " The MIT License (MIT)
 "
-" Copyright © 2014-2015 Martin Tournoij
+" Copyright © 2014-2016 Martin Tournoij
 "
 " Permission is hereby granted, free of charge, to any person obtaining a copy
 " of this software and associated documentation files (the "Software"), to
