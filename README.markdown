@@ -1,3 +1,8 @@
+Project status: finished (it does what it needs to do and there are no known bugs).
+
+-----------------------------------------
+
+
 Manage passwords with Vim.
 
 You will need Vim 7.4.399 or later (Vim 7.3 will also work, but has a flaw in
