@@ -1,4 +1,4 @@
-Project status: finished (it does what it needs to do and there are no known bugs).
+Project status: stable
 
 -----------------------------------------
 
