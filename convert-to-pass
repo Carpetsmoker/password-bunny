@@ -1,0 +1,70 @@
+#!/bin/sh
+
+set -euC
+
+file=${1:-./passwords.pwbunny}
+if [ ! -f "$file" ]; then
+	echo "Password database '$file' not found"
+	echo
+	echo "$0 [password-database]"
+	exit 1
+fi
+
+tmp=$(mktemp /tmp/pwbunny.XXXXX)
+clean() {
+	rm -f "$tmp"
+}
+
+trap clean EXIT
+
+echo "WARNING: this file will temporarily store an UNENCRYPTED copy of the file to"
+echo "$tmp AND it may echo sensitive data to the SCREEN."
+echo "Press enter if that's okay; ^C if it's not"
+read
+
+# "Export" file to plain text
+vim "$file" -c ':set key=' -c ":w! $tmp" -c ':q!'
+
+ins() {
+	local name=$1
+	local data=$2
+
+	if [ "$name" = "" ]; then
+		echo "EMPTY NAME!"
+		exit 1
+	fi
+	if [ "$data" = "" ]; then
+		echo "EMPTY DATA!"
+		exit 1
+	fi
+
+	# Make sure there is no printf formatting.
+	data=$(echo "$data" | sed 's/%/%%/g')
+	printf "$data" | pass insert --multiline "$name"
+}
+
+i=1
+data=""
+while read line; do
+	# First line: name
+	if [ $i -eq 1 ]; then
+		name=$line
+	# Second line: username
+	elif [ $i -eq 2 ]; then
+		data="User: $line\n"
+	# Blank line: end this block and insert in pass.
+	elif [ "$line" = "" ]; then
+		ins "$name" "$data"
+		i=0
+		data=""
+		name=""
+	# Third line onwards: secret data
+	else
+		data="$data$line\n"
+	fi
+
+	i=$(( $i + 1 ))
+done < "$tmp"
+
+# Make sure we also add the last entry.
+ins "$name" "$data"

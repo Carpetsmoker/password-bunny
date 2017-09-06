@@ -1,5 +1,11 @@
 [![This project is archived](https://img.shields.io/badge/Status-archived-red.svg)](https://arp242.net/status/archived)
 
+Note that this project is **archived**. I added a `convert-to-pass` script to
+convert the contents of a password database to
+[`pass`](https://www.passwordstore.org/).
+
+---
+
 Manage passwords with Vim.
 
 You will need Vim 7.4.399 or later (Vim 7.3 will also work, but has a flaw in
